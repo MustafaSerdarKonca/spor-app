@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resetting App...</title>
+    <style>
+        body {
+            font-family: system-ui;
+            padding: 40px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Uygulama Sıfırlanıyor...</h1>
+    <p>Lütfen bekleyin, temizlik yapılıyor.</p>
+    <div id="log">Starting...</div>
+
+    <script>
+        async function reset() {
+            const log = document.getElementById('log');
+
+            // 1. Unregister SW
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (let registration of registrations) {
+                    await registration.unregister();
+                    log.innerHTML += '<br>Service Worker silindi.';
+                }
+            }
+
+            // 2. Clear Caches
+            const keys = await caches.keys();
+            for (const key of keys) {
+                await caches.delete(key);
+                log.innerHTML += `<br>Önbellek temizlendi: ${key}`;
+            }
+
+            // 3. Redirect
+            log.innerHTML += '<br><b>TAMAMLANDI! Yönlendiriliyor...</b>';
+            setTimeout(() => {
+                window.location.href = 'index.html?v=' + Date.now();
+            }, 1500);
+        }
+
+        reset();
+    </script>
+</body>
+
+</html>

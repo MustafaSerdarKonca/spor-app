@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Spor App</title>
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Spor App">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1c1c1e" media="(prefers-color-scheme: dark)">
+    <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+    <header>
+        <div class="day-tabs">
+            <!-- Populated by JS -->
+        </div>
+    </header>
+
+    <main id="exercise-list">
+        <!-- populated by JS -->
+    </main>
+
+    <!-- Floating Action Button -->
+    <button class="fab" id="fab-add" aria-label="Hareket Ekle">+</button>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">Yeni Hareket</h2>
+                <button class="btn-icon" id="close-modal">✕</button>
+            </div>
+            <form id="exercise-form">
+                <div class="form-group">
+                    <label>Hareket Adı</label>
+                    <input type="text" id="inp-name" class="form-control" placeholder="Örn: Squat" required>
+                </div>
+                <div class="form-group">
+                    <label>Kas Grubu / Etiket (Opsiyonel)</label>
+                    <input type="text" id="inp-tag" class="form-control" placeholder="Örn: Bacak">
+                </div>
+                <div class="form-group">
+                    <label>Not (Opsiyonel)</label>
+                    <input type="text" id="inp-note" class="form-control" placeholder="Örn: 4 set 12 tekrar">
+                </div>
+                <div class="form-group">
+                    <label>Görsel Ekle (Opsiyonel)</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="inp-image" accept="image/*" class="form-control-file">
+                        <div id="image-preview" class="image-preview-box">Görsel Seç</div>
+                    </div>
+                </div>
+                <button type="submit" class="btn-block">Kaydet</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script -->
+    <script type="module" src="js/app.js"></script>
+    <script>
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(() => console.log('SW Registered'))
+                .catch(e => console.error('SW Fail', e));
+        }
+    </script>
+</body>
+
+</html>
