@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 import { getFirestore, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-messaging.js";
 
 // TODO: KULLANICI BURAYI GUNCELLEYECEK
 // Lutfen firebase_setup_instructions.md dosyasindaki adimlari takip ederek
@@ -19,6 +20,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const messaging = getMessaging(app);
 
 // Enable Offline Persistence
 enableIndexedDbPersistence(db)
@@ -31,4 +33,4 @@ enableIndexedDbPersistence(db)
     });
 
 // Export for other files to use
-export { auth, db };
+export { auth, db, messaging, getToken };

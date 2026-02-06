@@ -1,4 +1,34 @@
-const CACHE_NAME = 'spor-app-v4';
+importScripts('https://www.gstatic.com/firebasejs/11.0.2/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/11.0.2/firebase-messaging-compat.js');
+
+const CACHE_NAME = 'spor-app-v6';
+// Initialize Firebase in SW (Required for background messages)
+// Config must match your project
+firebase.initializeApp({
+    apiKey: "AIzaSyA18EFuGFq9TuAC7S-fw6nq8VY_X9H6Omw",
+    authDomain: "spor-app-98027.firebaseapp.com",
+    projectId: "spor-app-98027",
+    storageBucket: "spor-app-98027.firebasestorage.app",
+    messagingSenderId: "38427901547",
+    appId: "1:38427901547:web:b78bd902af1b9e2ccebb2e",
+    measurementId: "G-FSTPRB5MC1"
+});
+
+const messaging = firebase.messaging();
+
+messaging.onBackgroundMessage((payload) => {
+    console.log('[firebase-messaging-sw.js] Received background message ', payload);
+    // Default browser notification is usually handled automatically if 'notification' key is sent,
+    // but if 'data' only is sent, we can customize here.
+    const notificationTitle = payload.notification.title;
+    const notificationOptions = {
+        body: payload.notification.body,
+        icon: '/assets/icons/icon-192.png'
+    };
+
+    self.registration.showNotification(notificationTitle, notificationOptions);
+});
+
 const ASSETS = [
     './',
     './index.html',
