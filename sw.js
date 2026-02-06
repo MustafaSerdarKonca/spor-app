@@ -1,7 +1,7 @@
 importScripts('https://www.gstatic.com/firebasejs/11.0.2/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/11.0.2/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'spor-app-v6';
+const CACHE_NAME = 'spor-app-v7';
 // Initialize Firebase in SW (Required for background messages)
 // Config must match your project
 firebase.initializeApp({
@@ -41,6 +41,8 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', (event) => {
+    // Force new SW to become active immediately
+    self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
     );
@@ -57,6 +59,8 @@ self.addEventListener('fetch', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
+    // Take control of all pages immediately 
+    event.waitUntil(clients.claim());
     event.waitUntil(
         caches.keys().then((keys) => {
             return Promise.all(
