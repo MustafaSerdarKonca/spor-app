@@ -1,7 +1,7 @@
 importScripts('https://www.gstatic.com/firebasejs/11.0.2/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/11.0.2/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'spor-app-v7';
+const CACHE_NAME = 'spor-app-v8';
 // Initialize Firebase in SW (Required for background messages)
 // Config must match your project
 firebase.initializeApp({

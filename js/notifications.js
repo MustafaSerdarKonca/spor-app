@@ -1,4 +1,16 @@
 import { messaging, getToken } from './firebase-config.js';
+import { onMessage } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-messaging.js";
+
+export const initNotificationListener = () => {
+    onMessage(messaging, (payload) => {
+        console.log('Foreground message received ', payload);
+        // Customize how you want to show the notification when app is open
+        const { title, body } = payload.notification || {};
+        if (title) {
+            alert(`🔔 ${title}\n\n${body}`);
+        }
+    });
+};
 
 export const requestNotificationPermission = async () => {
     try {
