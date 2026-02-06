@@ -1,71 +1,40 @@
 /**
- * IndexedDB Helper for Spor App
+ * Firestore Database Helper
  */
+import { db } from './firebase-config.js';
+import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
-const DB_NAME = 'spor_app_db';
-const DB_VERSION = 1;
-const STORE_NAME = 'weekly_plan';
+// Collection structure: users/{userId}/days/{dayId}
 
-let dbPromise = null;
+export const getDay = async (userId, dayId) => {
+    try {
+        const docRef = doc(db, "users", userId, "days", dayId);
+        const docSnap = await getDoc(docRef);
 
-export const initDB = () => {
-    if (dbPromise) return dbPromise;
-
-    dbPromise = new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-        request.onupgradeneeded = (event) => {
-            const db = event.target.result;
-            if (!db.objectStoreNames.contains(STORE_NAME)) {
-                db.createObjectStore(STORE_NAME, { keyPath: 'dayId' });
-            }
-        };
-
-        request.onsuccess = (event) => {
-            console.log('DB initialized');
-            resolve(event.target.result);
-        };
-
-        request.onerror = (event) => {
-            console.error('DB init error:', event.target.error);
-            reject(event.target.error);
-        };
-    });
-    return dbPromise;
+        if (docSnap.exists()) {
+            return docSnap.data();
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.error("Error getting document:", error);
+        throw error;
+    }
 };
 
-export const getDay = async (dayId) => {
-    const db = await initDB();
-    return new Promise((resolve, reject) => {
-        const transaction = db.transaction([STORE_NAME], 'readonly');
-        const store = transaction.objectStore(STORE_NAME);
-        const request = store.get(dayId);
+export const saveDay = async (userId, dayData) => {
+    try {
+        // Ensure dayId is present
+        if (!dayData.dayId) throw new Error("DayData must have dayId");
 
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-    });
+        const docRef = doc(db, "users", userId, "days", dayData.dayId);
+        await setDoc(docRef, dayData);
+        console.log("Document saved");
+    } catch (error) {
+        console.error("Error saving document:", error);
+        throw error;
+    }
 };
 
-export const saveDay = async (dayData) => {
-    const db = await initDB();
-    return new Promise((resolve, reject) => {
-        const transaction = db.transaction([STORE_NAME], 'readwrite');
-        const store = transaction.objectStore(STORE_NAME);
-        const request = store.put(dayData);
-
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-    });
-};
-
-export const getAllDays = async () => {
-    const db = await initDB();
-    return new Promise((resolve, reject) => {
-        const transaction = db.transaction([STORE_NAME], 'readonly');
-        const store = transaction.objectStore(STORE_NAME);
-        const request = store.getAll();
-
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-    });
-};
+// No longer exporting initDB as Firebase SDK handles it.
+export const initDB = () => Promise.resolve(); 

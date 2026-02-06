@@ -1,7 +1,12 @@
 /**
  * Spor App Logic
  */
-import { initDB, getDay, saveDay } from './db.js';
+import { auth, db } from './firebase-config.js';
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import { setupAuthListeners, updateUIForUser } from './auth.js';
+// We currently keep using local DB logic for operations, but will guard it with auth state.
+// Future step: Switch 'db.js' to use Firestore 'db' instance.
+import { getDay, saveDay } from './db.js';
 import { processImage } from './image_utils.js';
 
 const DAYS = [
@@ -16,6 +21,7 @@ const DAYS = [
 
 let currentDayId = 'mon'; // Default
 let currentDayData = { dayId: 'mon', exercises: [] };
+let currentUser = null; // Store current user
 
 // DOM Elements
 const dayTabsContainer = document.querySelector('.day-tabs');
@@ -27,20 +33,27 @@ const exerciseForm = document.getElementById('exercise-form');
 
 // Initialization
 const init = async () => {
-    setupTabs();
+    setupAuthListeners();
 
-    // Determine current day of week (0=Sun, 1=Mon...)
-    const todayIndex = new Date().getDay();
-    // Convert JS day (Sun=0) to our array (Mon=0..Sun=6)
-    // Sunday (0) should be index 6. 1-6 are 0-5.
-    const mappedIndex = todayIndex === 0 ? 6 : todayIndex - 1;
-    currentDayId = DAYS[mappedIndex].id;
+    // Listen to Auth State
+    onAuthStateChanged(auth, async (user) => {
+        currentUser = user;
+        updateUIForUser(user);
 
-    // Highlight initial tab
-    updateActiveTab();
-
-    // Load Data
-    await loadCurrentDay();
+        if (user) {
+            console.log("Logged in:", user.email);
+            // Initialize App
+            setupTabs();
+            // Determine current day
+            const todayIndex = new Date().getDay();
+            const mappedIndex = todayIndex === 0 ? 6 : todayIndex - 1;
+            currentDayId = DAYS[mappedIndex].id;
+            updateActiveTab();
+            await loadCurrentDay();
+        } else {
+            console.log("Logged out");
+        }
+    });
 };
 
 const setupTabs = () => {
@@ -66,7 +79,6 @@ const updateActiveTab = () => {
     tabs.forEach(tab => {
         if (tab.dataset.id === currentDayId) {
             tab.classList.add('active');
-            // Scroll to active tab
             tab.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
         } else {
             tab.classList.remove('active');
@@ -75,9 +87,12 @@ const updateActiveTab = () => {
 };
 
 const loadCurrentDay = async () => {
+    if (!currentUser) return; // Guard
+
     exerciseList.innerHTML = '<div style="padding:20px;text-align:center">Yükleniyor...</div>';
+
     try {
-        const data = await getDay(currentDayId);
+        const data = await getDay(currentUser.uid, currentDayId);
         if (data) {
             currentDayData = data;
         } else {
@@ -159,15 +174,14 @@ window.addWeight = async (exerciseId) => {
     if (exIndex > -1) {
         // Add to history (beginning)
         currentDayData.exercises[exIndex].history.unshift(val);
-        // Keep only top 3 implies we just need last 3? User said "son 3 değer".
-        // Often users want to keep history forever but VIEW last 3. 
-        // For MVP simplicity and requested structure "weights[son3]", we can just keep 3 or keep all.
-        // Prompt says "4. olursa en eski düşsün" -> So literally only keep 3.
+        // Prompt says "4. olursa en eski düşsün"
         if (currentDayData.exercises[exIndex].history.length > 3) {
             currentDayData.exercises[exIndex].history.pop();
         }
 
-        await saveDay(currentDayData);
+        if (currentUser) {
+            await saveDay(currentUser.uid, currentDayData);
+        }
         renderExercises();
     }
 };
@@ -175,7 +189,9 @@ window.addWeight = async (exerciseId) => {
 window.deleteExercise = async (exerciseId) => {
     if (confirm('Bu hareketi silmek istediğine emin misin?')) {
         currentDayData.exercises = currentDayData.exercises.filter(e => e.id !== exerciseId);
-        await saveDay(currentDayData);
+        if (currentUser) {
+            await saveDay(currentUser.uid, currentDayData);
+        }
         renderExercises();
     }
 };
@@ -208,17 +224,19 @@ if (imageInput) {
     };
 }
 
-fab.onclick = () => {
-    editingId = null;
-    currentImageBase64 = null;
-    document.getElementById('modal-title').textContent = 'Yeni Hareket';
-    exerciseForm.reset();
-    if (imagePreview) {
-        imagePreview.style.backgroundImage = '';
-        imagePreview.textContent = 'Görsel Seç';
-    }
-    modalOverlay.classList.add('open');
-};
+if (fab) {
+    fab.onclick = () => {
+        editingId = null;
+        currentImageBase64 = null;
+        document.getElementById('modal-title').textContent = 'Yeni Hareket';
+        exerciseForm.reset();
+        if (imagePreview) {
+            imagePreview.style.backgroundImage = '';
+            imagePreview.textContent = 'Görsel Seç';
+        }
+        modalOverlay.classList.add('open');
+    };
+}
 
 window.openEditModal = (exId) => {
     editingId = exId;
@@ -245,58 +263,67 @@ window.openEditModal = (exId) => {
     modalOverlay.classList.add('open');
 };
 
-closeModalBtn.onclick = () => {
-    modalOverlay.classList.remove('open');
-};
-modalOverlay.onclick = (e) => {
-    if (e.target === modalOverlay) modalOverlay.classList.remove('open');
-};
+if (closeModalBtn) {
+    closeModalBtn.onclick = () => {
+        modalOverlay.classList.remove('open');
+    };
+}
+if (modalOverlay) {
+    modalOverlay.onclick = (e) => {
+        if (e.target === modalOverlay) modalOverlay.classList.remove('open');
+    };
+}
 
-exerciseForm.onsubmit = async (e) => {
-    e.preventDefault();
-    const name = document.getElementById('inp-name').value.trim();
-    const tag = document.getElementById('inp-tag').value.trim();
-    const note = document.getElementById('inp-note').value.trim();
+if (exerciseForm) {
+    exerciseForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('inp-name').value.trim();
+        const tag = document.getElementById('inp-tag').value.trim();
+        const note = document.getElementById('inp-note').value.trim();
 
-    if (!name) return;
+        if (!name) return;
 
-    if (editingId) {
-        // Edit
-        const ex = currentDayData.exercises.find(e => e.id === editingId);
-        if (ex) {
-            ex.name = name;
-            ex.tag = tag;
-            ex.note = note;
-            if (currentImageBase64) ex.image = currentImageBase64; // Only update if new image or keeping existing
+        if (editingId) {
+            // Edit
+            const ex = currentDayData.exercises.find(e => e.id === editingId);
+            if (ex) {
+                ex.name = name;
+                ex.tag = tag;
+                ex.note = note;
+                if (currentImageBase64) ex.image = currentImageBase64; // Only update if new image or keeping existing
+            }
+        } else {
+            // Add
+            const newEx = {
+                id: Date.now().toString(), // Simple ID
+                name,
+                tag,
+                note,
+                image: currentImageBase64,
+                history: []
+            };
+            currentDayData.exercises.push(newEx);
         }
-    } else {
-        // Add
-        const newEx = {
-            id: Date.now().toString(), // Simple ID
-            name,
-            tag,
-            note,
-            image: currentImageBase64,
-            history: []
-        };
-        currentDayData.exercises.push(newEx);
-    }
 
-    await saveDay(currentDayData);
-    modalOverlay.classList.remove('open');
-    renderExercises();
-};
+        if (currentUser) {
+            await saveDay(currentUser.uid, currentDayData);
+        }
+        modalOverlay.classList.remove('open');
+        renderExercises();
+    };
+}
 
 
 // Optional: View Full Image
 window.viewImage = (src) => {
-    // Simple alert or modal for now. User didn't strictly request lightbox, but useful.
-    // For now, just logging or could open in new tab.
-    // To match MVP, we won't overengineer a lightbox yet.
+    // Simple alert or modal for now.
+    window.open(src, '_blank');
 };
 
 // --- Boot ---
+// Call init which sets up auth listener
 init();
+
 
 // Expose global methods because modules isolate scope, but we use inline onclick="" in HTML
 // Alternatively, we could attach listeners in renderExercises, but this is simpler for MVP.

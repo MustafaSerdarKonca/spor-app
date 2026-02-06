@@ -439,6 +439,106 @@ main {
   }
 }
 
-.fade-in {
-  animation: fadeIn 0.3s ease-out forwards;
+/* Auth Styles */
+#auth-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+  background-color: var(--background);
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.auth-header h1 {
+  font-size: 32px;
+  font-weight: 800;
+  margin: 0 0 8px 0;
+  color: var(--primary);
+}
+
+.auth-header p {
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--card-bg);
+  padding: 30px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.auth-divider {
+  text-align: center;
+  margin: 16px 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+  position: relative;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 40%;
+  height: 1px;
+  background-color: var(--separator);
+}
+
+.auth-divider::before {
+  left: 0;
+}
+
+.auth-divider::after {
+  right: 0;
+}
+
+.btn-google {
+  background-color: #fff;
+  color: #333;
+  border: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .btn-google {
+    background-color: #eee;
+  }
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+}
+
+.btn-text {
+  background: none;
+  border: none;
+  color: var(--primary);
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-text:hover {
+  text-decoration: underline;
+}
+
+/* Ensure App Container is hidden properly */
+.hidden {
+  display: none !important;
 }
