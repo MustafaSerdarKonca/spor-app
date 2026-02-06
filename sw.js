@@ -1,10 +1,12 @@
-const CACHE_NAME = 'spor-app-v2';
+const CACHE_NAME = 'spor-app-v3';
 const ASSETS = [
     './',
     './index.html',
     './css/styles.css',
     './js/app.js',
     './js/db.js',
+    './js/auth.js',
+    './js/firebase-config.js',
     './manifest.json'
 ];
 
