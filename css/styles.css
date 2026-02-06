@@ -503,17 +503,43 @@ main {
 
 .btn-google {
   background-color: #fff;
-  color: #333;
-  border: 1px solid #ddd;
+  color: #1f1f1f;
+  border: 1px solid #747775;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 500;
+  border-radius: 20px;
+  /* Fully rounded pill shape often looks premium */
+  transition: background-color 0.2s, box-shadow 0.2s;
+  border: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.btn-google:hover {
+  background-color: #f8f9fa;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15), 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+.btn-google:active {
+  background-color: #eeeeee;
+  transform: translateY(1px);
 }
 
 @media (prefers-color-scheme: dark) {
   .btn-google {
-    background-color: #eee;
+    background-color: #131314;
+    color: #e3e3e3;
+    border: 1px solid #8e918f;
+    box-shadow: none;
+    /* Dark mode usually flatter */
+  }
+
+  .btn-google:hover {
+    background-color: #1b1b1b;
+    border-color: #acafac;
   }
 }
 

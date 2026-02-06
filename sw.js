@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spor-app-v3';
+const CACHE_NAME = 'spor-app-v4';
 const ASSETS = [
     './',
     './index.html',
