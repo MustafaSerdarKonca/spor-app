@@ -4,7 +4,7 @@
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 import { setupAuthListeners, updateUIForUser } from './auth.js';
-import { requestNotificationPermission, initNotificationListener } from './notifications.js';
+import { subscribeUserToPush, sendTestNotification } from './notifications.js';
 // We currently keep using local DB logic for operations, but will guard it with auth state.
 // Future step: Switch 'db.js' to use Firestore 'db' instance.
 import { getDay, saveDay } from './db.js';
@@ -324,11 +324,24 @@ window.viewImage = (src) => {
 // --- Boot ---
 // Call init which sets up auth listener
 init();
+
 // Button Listeners
 document.getElementById('btn-enable-notify')?.addEventListener('click', () => {
-    requestNotificationPermission();
+    if (currentUser) {
+        subscribeUserToPush(currentUser.uid);
+    } else {
+        alert('Bildirimleri açmak için giriş yapmalısınız.');
+    }
 });
-initNotificationListener();
+
+document.getElementById('btn-test-notify')?.addEventListener('click', () => {
+    if (currentUser) {
+        sendTestNotification(currentUser.uid);
+    } else {
+        alert('Test bildirimi için giriş yapmalısınız.');
+    }
+});
+
 
 
 // Expose global methods because modules isolate scope, but we use inline onclick="" in HTML
