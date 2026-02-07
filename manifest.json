@@ -1,6 +1,7 @@
 {
   "name": "Spor App",
   "short_name": "Spor",
+  "gcm_sender_id": "103953800507",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#F2F2F7",
