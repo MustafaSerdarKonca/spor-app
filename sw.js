@@ -1,7 +1,9 @@
 importScripts('https://www.gstatic.com/firebasejs/11.0.2/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/11.0.2/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'spor-app-v10'; // Incremented version
+const CACHE_NAME = 'spor-app-v12'; // Incremented version
+const LAST_UPDATED = '2026-02-07T12:45:00'; // Force byte difference
+
 const ASSETS = [
     './',
     './index.html',
@@ -14,7 +16,7 @@ const ASSETS = [
     './manifest.json'
 ];
 
-// Initialize Firebase in SW (Required for background messages)
+// Initialize Firebase in SW
 firebase.initializeApp({
     apiKey: "AIzaSyA18EFuGFq9TuAC7S-fw6nq8VY_X9H6Omw",
     authDomain: "spor-app-98027.firebaseapp.com",
@@ -33,7 +35,7 @@ messaging.onBackgroundMessage((payload) => {
     const notificationOptions = {
         body: payload.notification.body,
         icon: '/assets/icons/icon-192.png',
-        data: { url: payload.data?.url || '/' } // Pass URL if available
+        data: { url: payload.data?.url || '/' }
     };
 
     self.registration.showNotification(notificationTitle, notificationOptions);
@@ -60,12 +62,40 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-    // Cache First for assets, Network First for API (if any)
-    // Here using Stale-While-Revalidate logic for simplicity
+    // Network First Strategy
+    // For navigation requests (HTML), we want to be EXTRA aggressive to reliable get the latest version.
+    if (event.request.mode === 'navigate') {
+        event.respondWith(
+            fetch(event.request)
+                .then((networkResponse) => {
+                    return caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request, networkResponse.clone());
+                        return networkResponse;
+                    });
+                })
+                .catch(() => {
+                    return caches.match(event.request);
+                })
+        );
+        return;
+    }
+
+    // For other assets, standard Network First
     event.respondWith(
-        caches.match(event.request).then((response) => {
-            return response || fetch(event.request);
-        })
+        fetch(event.request)
+            .then((networkResponse) => {
+                if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+                    return networkResponse;
+                }
+                const responseToCache = networkResponse.clone();
+                caches.open(CACHE_NAME).then((cache) => {
+                    cache.put(event.request, responseToCache);
+                });
+                return networkResponse;
+            })
+            .catch(() => {
+                return caches.match(event.request);
+            })
     );
 });
 

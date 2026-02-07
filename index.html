@@ -148,6 +148,17 @@
             navigator.serviceWorker.register('sw.js').then(reg => {
                 console.log('SW Registered');
 
+                // FORCE UPDATE CHECK:
+                // Check for updates immediately when the page loads
+                reg.update();
+
+                // Also check when the page becomes visible again (e.g., coming from background)
+                document.addEventListener('visibilitychange', () => {
+                    if (document.visibilityState === 'visible') {
+                        reg.update();
+                    }
+                });
+
                 // If there's an update ready, it will install and activate thanks to skipWaiting() in sw.js
                 // Then simple page reload or user prompt is needed.
                 // For this app, we will auto-reload if it's a new version content update.
@@ -157,6 +168,7 @@
                         if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                             // New content is available.
                             console.log('New update available.');
+                            // Optional: notify user or auto-reload handled by controllerchange below
                         }
                     });
                 });
