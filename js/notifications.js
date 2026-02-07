@@ -1,5 +1,6 @@
-import { messaging, getToken } from './firebase-config.js';
+import { messaging, getToken, db } from './firebase-config.js';
 import { onMessage } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-messaging.js";
+import { doc, updateDoc, arrayUnion, setDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
 export function listenForMessages() {
     onMessage(messaging, (payload) => {
@@ -42,6 +43,22 @@ export async function subscribeUserToPush(userId) {
             if (token) {
                 console.log('FCM Token:', token);
 
+                // --- SAVE TO FIRESTORE ---
+                // We use setDoc with merge:true to create document if missing, or update if exists.
+                // We use arrayUnion to add token to a list (handling multiple devices for same user)
+                if (userId) {
+                    try {
+                        const userRef = doc(db, "users", userId);
+                        await setDoc(userRef, {
+                            fcmTokens: arrayUnion(token),
+                            lastLogin: new Date().toISOString()
+                        }, { merge: true });
+                        console.log("Token saved to Firestore for user:", userId);
+                    } catch (dbError) {
+                        console.error("Error saving token to DB:", dbError);
+                    }
+                }
+
                 // Show on screen
                 const tokenDiv = document.getElementById('token-display');
                 const tokenText = document.getElementById('token-text');
@@ -50,7 +67,7 @@ export async function subscribeUserToPush(userId) {
                     tokenText.textContent = token;
                 }
 
-                alert('Abonelik Başarılı! En altta çıkan Token kodunu kopyalayın.');
+                alert('Abonelik Başarılı! \n\nToken otomatik olarak veri tabanına kaydedildi. Artık manuel kopyalamaya gerek yok.');
             } else {
                 console.log('No registration token available.');
             }
