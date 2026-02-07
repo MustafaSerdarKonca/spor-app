@@ -1,4 +1,4 @@
-import { messaging, getToken, db } from './firebase-config.js';
+import { messaging, getToken, db, auth } from './firebase-config.js';
 import { onMessage } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-messaging.js";
 import { doc, updateDoc, arrayUnion, setDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
@@ -46,17 +46,30 @@ export async function subscribeUserToPush(userId) {
                 // --- SAVE TO FIRESTORE ---
                 // We use setDoc with merge:true to create document if missing, or update if exists.
                 // We use arrayUnion to add token to a list (handling multiple devices for same user)
-                if (userId) {
+                // --- SAVE TO FIRESTORE ---
+                // We use setDoc with merge:true to create document if missing, or update if exists.
+                // We use arrayUnion to add token to a list (handling multiple devices for same user)
+
+                // Robust check: Use argument OR current auth user
+                const effectiveUserId = userId || auth.currentUser?.uid;
+
+                if (effectiveUserId) {
                     try {
-                        const userRef = doc(db, "users", userId);
+                        const userRef = doc(db, "users", effectiveUserId);
                         await setDoc(userRef, {
                             fcmTokens: arrayUnion(token),
-                            lastLogin: new Date().toISOString()
+                            lastLogin: new Date().toISOString(),
+                            email: auth.currentUser?.email || 'unknown' // Helpful for debugging
                         }, { merge: true });
-                        console.log("Token saved to Firestore for user:", userId);
+                        console.log("Token saved to Firestore for user:", effectiveUserId);
+                        alert('✅ BAŞARILI!\nToken veritabanına kaydedildi.\nArtık Firebase Console\'dan bildirim atabilirsin.');
                     } catch (dbError) {
                         console.error("Error saving token to DB:", dbError);
+                        alert('❌ HATA: Token alındı ama veritabanına yazılamadı!\nHata detayı: ' + dbError.message);
                     }
+                } else {
+                    console.warn("No user ID found, skipping Firestore save.");
+                    alert('⚠️ UYARI: Giriş yapmadığınız için Token veritabanına kaydedilemedi.');
                 }
 
                 // Show on screen
