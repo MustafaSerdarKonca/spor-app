@@ -4,7 +4,7 @@
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 import { setupAuthListeners, updateUIForUser } from './auth.js';
-import { subscribeUserToPush, sendTestNotification } from './notifications.js';
+import { subscribeUserToPush, sendTestNotification, listenForMessages } from './notifications.js';
 // We currently keep using local DB logic for operations, but will guard it with auth state.
 // Future step: Switch 'db.js' to use Firestore 'db' instance.
 import { getDay, saveDay } from './db.js';
@@ -324,6 +324,7 @@ window.viewImage = (src) => {
 // --- Boot ---
 // Call init which sets up auth listener
 init();
+listenForMessages();
 
 // Button Listeners
 document.getElementById('btn-enable-notify')?.addEventListener('click', () => {

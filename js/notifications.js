@@ -1,4 +1,13 @@
 import { messaging, getToken } from './firebase-config.js';
+import { onMessage } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-messaging.js";
+
+export function listenForMessages() {
+    onMessage(messaging, (payload) => {
+        console.log('Message received. ', payload);
+        const { title, body } = payload.notification || {};
+        alert(`🔔 Bildirim Geldi! (Uygulama Açık)\n\n${title}\n${body}`);
+    });
+}
 
 export async function subscribeUserToPush(userId) {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
