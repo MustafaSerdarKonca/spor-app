@@ -46,9 +46,6 @@ export async function subscribeUserToPush(userId) {
                 // --- SAVE TO FIRESTORE ---
                 // We use setDoc with merge:true to create document if missing, or update if exists.
                 // We use arrayUnion to add token to a list (handling multiple devices for same user)
-                // --- SAVE TO FIRESTORE ---
-                // We use setDoc with merge:true to create document if missing, or update if exists.
-                // We use arrayUnion to add token to a list (handling multiple devices for same user)
 
                 // Robust check: Use argument OR current auth user
                 const effectiveUserId = userId || auth.currentUser?.uid;
@@ -62,25 +59,15 @@ export async function subscribeUserToPush(userId) {
                             email: auth.currentUser?.email || 'unknown' // Helpful for debugging
                         }, { merge: true });
                         console.log("Token saved to Firestore for user:", effectiveUserId);
-                        alert('✅ BAŞARILI!\nToken veritabanına kaydedildi.\nArtık Firebase Console\'dan bildirim atabilirsin.');
+                        alert('✅ BAŞARILI!\nBildirimler açıldı ve sistem otomatik ayarlandı.');
                     } catch (dbError) {
                         console.error("Error saving token to DB:", dbError);
                         alert('❌ HATA: Token alındı ama veritabanına yazılamadı!\nHata detayı: ' + dbError.message);
                     }
                 } else {
                     console.warn("No user ID found, skipping Firestore save.");
-                    alert('⚠️ UYARI: Giriş yapmadığınız için Token veritabanına kaydedilemedi.');
+                    alert('⚠️ UYARI: Giriş yapmadığınız için sistem otomatik ayarlanamadı. Lütfen giriş yapıp tekrar deneyin.');
                 }
-
-                // Show on screen
-                const tokenDiv = document.getElementById('token-display');
-                const tokenText = document.getElementById('token-text');
-                if (tokenDiv && tokenText) {
-                    tokenDiv.style.display = 'block';
-                    tokenText.textContent = token;
-                }
-
-                alert('Abonelik Başarılı! \n\nToken otomatik olarak veri tabanına kaydedildi. Artık manuel kopyalamaya gerek yok.');
             } else {
                 console.log('No registration token available.');
             }
@@ -90,41 +77,5 @@ export async function subscribeUserToPush(userId) {
     } catch (err) {
         console.error('An error occurred while retrieving token. ', err);
         alert('Hata: ' + err.message);
-    }
-}
-
-export async function sendTestNotification(userId) {
-    try {
-        // Since we are serverless, we can't send a real notification from client.
-        // Instead, let's use this button to help user retrieve their Token again.
-
-        const VAPID_KEY = 'BNxfKVpbJ7lNwkkjb-K_PY-uAKKgPrd15YL1ncyIKgnMNzgzzMFiKoLUDN0v4T5NGDzB4v259T4XzsYFtTBsXQM';
-
-        // Get Service Worker Registration
-        const registration = await navigator.serviceWorker.ready;
-
-        const token = await getToken(messaging, {
-            vapidKey: VAPID_KEY,
-            serviceWorkerRegistration: registration
-        });
-
-        if (token) {
-            // Show on screen
-            const tokenDiv = document.getElementById('token-display');
-            const tokenText = document.getElementById('token-text');
-            if (tokenDiv && tokenText) {
-                tokenDiv.style.display = 'block';
-                tokenText.textContent = token;
-
-                // Scroll to bottom
-                tokenDiv.scrollIntoView({ behavior: 'smooth' });
-            }
-            alert('Token tekrar alındı ve aşağıya yazıldı. \n\nBu Token\'ı kopyalayıp Firebase Console -> Cloud Messaging kısmından test bildirimi atabilirsiniz.');
-        } else {
-            alert('Henüz token yok. Lütfen önce ZİL (🔔) ikonuna basıp izin verin.');
-        }
-    } catch (e) {
-        console.error(e);
-        alert('Token alınamadı: ' + e.message);
     }
 }
