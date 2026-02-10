@@ -145,7 +145,7 @@
     <script>
         // Register Service Worker
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').then(reg => {
+            navigator.serviceWorker.register('sw.js?v=' + new Date().getTime()).then(reg => {
                 console.log('SW Registered');
 
                 // FORCE UPDATE CHECK:
