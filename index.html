@@ -21,10 +21,6 @@
 
 <body>
 
-    <!-- Global Background & Overlay -->
-    <div id="global-bg"></div>
-    <div id="global-overlay"></div>
-
     <div id="auth-container">
         <div class="auth-card">
             <div class="auth-header">
@@ -146,7 +142,47 @@
 
     <!-- Script -->
     <script type="module" src="js/app.js"></script>
-    <!-- Service Worker Removed for Online-Only Mode -->
+    <script>
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').then(reg => {
+                console.log('SW Registered');
+
+                // FORCE UPDATE CHECK:
+                // Check for updates immediately when the page loads
+                reg.update();
+
+                // Also check when the page becomes visible again (e.g., coming from background)
+                document.addEventListener('visibilitychange', () => {
+                    if (document.visibilityState === 'visible') {
+                        reg.update();
+                    }
+                });
+
+                // If there's an update ready, it will install and activate thanks to skipWaiting() in sw.js
+                // Then simple page reload or user prompt is needed.
+                // For this app, we will auto-reload if it's a new version content update.
+                reg.addEventListener('updatefound', () => {
+                    const newWorker = reg.installing;
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            // New content is available.
+                            console.log('New update available.');
+                            // Optional: notify user or auto-reload handled by controllerchange below
+                        }
+                    });
+                });
+            }).catch(e => console.error('SW Fail', e));
+
+            // Reload page when new SW takes control
+            let refreshing;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (refreshing) return;
+                window.location.reload();
+                refreshing = true;
+            });
+        }
+    </script>
 </body>
 
 </html>
