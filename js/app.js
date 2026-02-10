@@ -79,8 +79,9 @@ const switchDay = async (dayId) => {
 
 const updateBackground = (dayId) => {
     const day = DAYS.find(d => d.id === dayId);
-    if (day && day.bg) {
-        document.body.style.setProperty('--bg-image', `url('${day.bg}')`);
+    const bgEl = document.getElementById('global-bg');
+    if (day && day.bg && bgEl) {
+        bgEl.style.backgroundImage = `url('${day.bg}')`;
     }
 };
 
