@@ -51,6 +51,39 @@ body {
   padding-bottom: calc(var(--safe-bottom) + 80px);
   /* Space for FAB/Footer */
   -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Dynamic Background for Main App */
+body::after {
+  content: "";
+  position: fixed;
+  top: -5%;
+  left: -5%;
+  width: 110%;
+  height: 110%;
+  background-image: var(--bg-image);
+  /* Variable controlled by JS */
+  background-size: cover;
+  background-position: center;
+  z-index: -2;
+  transition: background-image 0.5s ease-in-out;
+  animation: kenBurns 30s ease-in-out infinite alternate;
+  filter: blur(2px);
+}
+
+/* Overlay for Main App */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  /* Dark overlay so content pops */
+  z-index: -1;
 }
 
 /* Header & Tabs */

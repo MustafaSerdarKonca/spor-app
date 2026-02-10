@@ -11,13 +11,13 @@ import { getDay, saveDay } from './db.js';
 import { processImage } from './image_utils.js';
 
 const DAYS = [
-    { id: 'mon', label: 'PZT' },
-    { id: 'tue', label: 'SAL' },
-    { id: 'wed', label: 'ÇAR' },
-    { id: 'thu', label: 'PER' },
-    { id: 'fri', label: 'CUM' },
-    { id: 'sat', label: 'CTS' },
-    { id: 'sun', label: 'PAZ' }
+    { id: 'mon', label: 'PZT', bg: 'assets/bg_mon.png' },
+    { id: 'tue', label: 'SAL', bg: 'assets/bg_tue.png' },
+    { id: 'wed', label: 'ÇAR', bg: 'assets/bg_wed.png' },
+    { id: 'thu', label: 'PER', bg: 'assets/bg_thu.png' },
+    { id: 'fri', label: 'CUM', bg: 'assets/bg_fri.png' },
+    { id: 'sat', label: 'CTS', bg: 'assets/bg_sat.png' },
+    { id: 'sun', label: 'PAZ', bg: 'assets/bg_sun.png' }
 ];
 
 let currentDayId = 'mon'; // Default
@@ -50,6 +50,7 @@ const init = async () => {
             const mappedIndex = todayIndex === 0 ? 6 : todayIndex - 1;
             currentDayId = DAYS[mappedIndex].id;
             updateActiveTab();
+            updateBackground(currentDayId);
             await loadCurrentDay();
         } else {
             console.log("Logged out");
@@ -72,7 +73,15 @@ const setupTabs = () => {
 const switchDay = async (dayId) => {
     currentDayId = dayId;
     updateActiveTab();
+    updateBackground(dayId);
     await loadCurrentDay();
+};
+
+const updateBackground = (dayId) => {
+    const day = DAYS.find(d => d.id === dayId);
+    if (day && day.bg) {
+        document.body.style.setProperty('--bg-image', `url('${day.bg}')`);
+    }
 };
 
 const updateActiveTab = () => {
