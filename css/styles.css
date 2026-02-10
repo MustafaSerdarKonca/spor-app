@@ -597,7 +597,8 @@ main {
   /* Adaptive Color Style */
   background-color: var(--background);
   color: var(--text-primary);
-  border: 1px solid transparent;
+  border: 1px solid var(--primary);
+  /* Blue border for all */
   border-radius: 12px;
   padding: 6px 12px;
   min-width: 48px;
@@ -612,12 +613,18 @@ main {
   transition: all 0.2s ease;
 }
 
-/* Latest weight highlights */
+/* Latest weight highlights - More flashy */
 .weight-bubble-container:first-child .weight-bubble {
-  border-color: var(--primary);
-  background-color: rgba(0, 122, 255, 0.1);
+  border: 2px solid var(--primary);
+  /* Thicker border for latest */
+  background-color: rgba(0, 122, 255, 0.15);
+  /* More visible tint */
   color: var(--primary);
-  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.25);
+  /* Stronger shadow */
+  font-weight: 700;
+  transform: scale(1.05);
+  /* Slightly larger */
 }
 
 .weight-bubble-container:first-child .bubble-date {

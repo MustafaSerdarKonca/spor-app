@@ -129,19 +129,10 @@ const renderExercises = () => {
             let weight, dateStr;
             if (typeof entry === 'object' && entry !== null) {
                 weight = entry.weight;
-                // Format date: "10 Eki" or "Bugün"
+                // Format date: "10 Eki" always
                 try {
                     const date = new Date(entry.date);
-                    const today = new Date();
-                    const isToday = date.getDate() === today.getDate() &&
-                        date.getMonth() === today.getMonth() &&
-                        date.getFullYear() === today.getFullYear();
-
-                    if (isToday) {
-                        dateStr = 'Bugün';
-                    } else {
-                        dateStr = date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
-                    }
+                    dateStr = date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
                 } catch (e) {
                     dateStr = '';
                 }
