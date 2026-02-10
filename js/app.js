@@ -125,7 +125,38 @@ const renderExercises = () => {
         card.className = 'exercise-card fade-in';
         card.style.animationDelay = `${index * 0.05}s`;
 
-        const historyBubbles = ex.history.slice(0, 3).map(w => `<span class="weight-bubble">${w}</span>`).join('');
+        const historyBubbles = ex.history.slice(0, 3).map(entry => {
+            let weight, dateStr;
+            if (typeof entry === 'object' && entry !== null) {
+                weight = entry.weight;
+                // Format date: "10 Eki" or "Bugün"
+                try {
+                    const date = new Date(entry.date);
+                    const today = new Date();
+                    const isToday = date.getDate() === today.getDate() &&
+                        date.getMonth() === today.getMonth() &&
+                        date.getFullYear() === today.getFullYear();
+
+                    if (isToday) {
+                        dateStr = 'Bugün';
+                    } else {
+                        dateStr = date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+                    }
+                } catch (e) {
+                    dateStr = '';
+                }
+            } else {
+                weight = entry;
+                dateStr = ''; // Retroactive: could show '-' or nothing
+            }
+
+            return `
+                <div class="weight-bubble-container">
+                    ${dateStr ? `<span class="bubble-date">${dateStr}</span>` : ''}
+                    <span class="weight-bubble">${weight}</span>
+                </div>
+            `;
+        }).join('');
         const imageHtml = ex.image ? `<img src="${ex.image}" class="exercise-thumb" alt="${ex.name}" onclick="viewImage('${ex.image}')">` : '';
 
         card.innerHTML = `
@@ -173,8 +204,14 @@ window.addWeight = async (exerciseId) => {
     // Find exercise
     const exIndex = currentDayData.exercises.findIndex(e => e.id === exerciseId);
     if (exIndex > -1) {
-        // Add to history (beginning)
-        currentDayData.exercises[exIndex].history.unshift(val);
+        // Add to history (beginning) with DATE
+        // New format: { weight: "10", date: "2023-10-27T..." }
+        const newEntry = {
+            weight: val,
+            date: new Date().toISOString()
+        };
+
+        currentDayData.exercises[exIndex].history.unshift(newEntry);
         // Prompt says "4. olursa en eski düşsün"
         if (currentDayData.exercises[exIndex].history.length > 3) {
             currentDayData.exercises[exIndex].history.pop();

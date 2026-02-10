@@ -568,3 +568,60 @@ main {
 .hidden {
   display: none !important;
 }
+
+/* Date Display Updates */
+/* Exercise History Bubbles */
+.weight-bubble-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  /* Align bottom to ensure bubbles line up if dates missing */
+  gap: 4px;
+  min-width: 44px;
+}
+
+.bubble-date {
+  font-size: 10px;
+  line-height: 1.2;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  opacity: 0.8;
+  margin-bottom: 2px;
+}
+
+.weight-bubble {
+  /* Adaptive Color Style */
+  background-color: var(--background);
+  color: var(--text-primary);
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 6px 12px;
+  min-width: 48px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.05);
+  /* Slight inset for depth */
+  transition: all 0.2s ease;
+}
+
+/* Latest weight highlights */
+.weight-bubble-container:first-child .weight-bubble {
+  border-color: var(--primary);
+  background-color: rgba(0, 122, 255, 0.1);
+  color: var(--primary);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.15);
+}
+
+.weight-bubble-container:first-child .bubble-date {
+  color: var(--primary);
+  opacity: 1;
+  font-weight: 700;
+}
