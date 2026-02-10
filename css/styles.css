@@ -446,33 +446,89 @@ main {
   justify-content: center;
   min-height: 100vh;
   padding: 20px;
-  background-color: var(--background);
+  background-color: #000;
+  /* Fallback */
+  position: relative;
+  overflow: hidden;
+}
+
+/* Dynamic Background Image */
+#auth-container::after {
+  content: "";
+  position: absolute;
+  top: -5%;
+  left: -5%;
+  width: 110%;
+  height: 110%;
+  background-image: url('../assets/gym_bg.png');
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+  animation: kenBurns 30s ease-in-out infinite alternate;
+  filter: blur(2px);
+  /* Slight blur for focus on content */
+}
+
+/* Dark Overlay */
+#auth-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  /* Dark overlay */
+  z-index: 1;
 }
 
 .auth-header {
   text-align: center;
   margin-bottom: 30px;
+  position: relative;
+  z-index: 2;
+  /* Ensure text is above overlay */
 }
 
 .auth-header h1 {
   font-size: 32px;
   font-weight: 800;
   margin: 0 0 8px 0;
-  color: var(--primary);
+  color: #FFFFFF;
+  /* Force white text for contrast */
 }
 
 .auth-header p {
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.7);
+  /* Light gray for contrast */
   margin: 0;
 }
 
+/* Ensure content is above background */
 .auth-card {
+  position: relative;
+  z-index: 2;
+  /* ... existing styles ... */
   width: 100%;
   max-width: 400px;
-  background: var(--card-bg);
+  background: rgba(28, 28, 30, 0.85);
+  /* Slightly transparent card */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   padding: 30px;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@keyframes kenBurns {
+  0% {
+    transform: scale(1) translate(0, 0);
+  }
+
+  100% {
+    transform: scale(1.15) translate(-2%, -2%);
+  }
 }
 
 .auth-divider {
