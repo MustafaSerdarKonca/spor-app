@@ -595,7 +595,8 @@ main {
 
 .weight-bubble {
   /* Adaptive Color Style */
-  background-color: var(--background);
+  background-color: transparent;
+  /* Matches card background */
   color: var(--text-primary);
   border: 1px solid var(--primary);
   /* Blue border for all */
