@@ -5,16 +5,22 @@
     <meta charset="UTF-8">
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Spor App</title>
+    <title>Spor App — Antrenman Takip</title>
+    <meta name="description" content="Antrenmanlarını takip et. Hareketlerini, ağırlıklarını ve gelişimini kaydet.">
 
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Spor App">
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#1c1c1e" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#F0F2F5" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0B0F1A" media="(prefers-color-scheme: dark)">
     <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -83,15 +89,11 @@
     <!-- Main App (Initially Hidden) -->
     <div id="app-container" style="display: none;">
         <header>
-            <div class="header-top"
-                style="display:flex; justify-content:space-between; align-items:center; padding: 0 16px; height: 40px;">
-                <span style="font-weight:700; font-size:18px;">SporApp</span>
-                <div style="display:flex; gap:10px;">
-                    <button id="btn-enable-notify" class="btn-icon" style="font-size:18px;"
-                        title="Bildirimleri Aç">🔔</button>
-
-                    <button id="btn-logout" class="btn-text"
-                        style="font-size:14px; color:var(--primary);">Çıkış</button>
+            <div class="header-top">
+                <span class="header-brand">SporApp</span>
+                <div class="header-actions">
+                    <button id="btn-enable-notify" class="btn-icon" title="Bildirimleri Aç">🔔</button>
+                    <button id="btn-logout" class="btn-text" style="width:auto; padding:8px 12px; margin:0;">Çıkış</button>
                 </div>
             </div>
             <div class="day-tabs">

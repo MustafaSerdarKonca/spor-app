@@ -10,6 +10,29 @@ import { subscribeUserToPush, listenForMessages } from './notifications.js';
 import { getDay, saveDay } from './db.js';
 import { processImage } from './image_utils.js';
 
+// --- Toast Notification Utility ---
+const showToast = (message, type = 'success', duration = 2000) => {
+    // Remove existing toast if any
+    const existing = document.querySelector('.toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    // Trigger show
+    requestAnimationFrame(() => {
+        toast.classList.add('show');
+    });
+
+    // Auto-hide
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+};
+
 const DAYS = [
     { id: 'mon', label: 'PZT', bg: 'assets/bg_mon.png' },
     { id: 'tue', label: 'SAL', bg: 'assets/bg_tue.png' },
@@ -122,8 +145,9 @@ const renderExercises = () => {
     if (currentDayData.exercises.length === 0) {
         exerciseList.innerHTML = `
             <div class="empty-state">
+                <span class="empty-state-icon">🏋️</span>
                 <h3>Bugün boş görünüyor</h3>
-                <p>Antrenmana başlamak için " + " butonuna basarak hareket ekle.</p>
+                <p>Antrenmana başlamak için aşağıdaki <strong>+</strong> butonuna bas.</p>
             </div>
         `;
         return;
@@ -221,6 +245,15 @@ window.addWeight = async (exerciseId) => {
             await saveDay(currentUser.uid, currentDayData);
         }
         renderExercises();
+
+        // Visual feedback: flash the card green
+        const cards = document.querySelectorAll('.exercise-card');
+        if (cards[exIndex]) {
+            cards[exIndex].classList.add('weight-added');
+            setTimeout(() => cards[exIndex].classList.remove('weight-added'), 700);
+        }
+
+        showToast(`✅ ${val} kg eklendi!`);
     }
 };
 
