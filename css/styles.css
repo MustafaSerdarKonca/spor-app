@@ -1044,6 +1044,207 @@ main {
 }
 
 /* ============================================
+   DRAG & DROP REORDERING
+   ============================================ */
+.drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  min-height: 48px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 20px;
+  cursor: grab;
+  padding: 0;
+  margin: 0;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  letter-spacing: 1px;
+  opacity: 0.5;
+}
+
+.drag-handle:hover {
+  opacity: 1;
+  background: rgba(59, 130, 246, 0.08);
+  color: var(--primary);
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+  opacity: 1;
+  color: var(--primary);
+  background: rgba(59, 130, 246, 0.12);
+}
+
+/* Update card content wrapper to include drag handle */
+.card-content-wrapper {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+/* Drag clone - floating elevated card */
+.drag-clone {
+  position: fixed;
+  z-index: 5000;
+  pointer-events: none;
+  opacity: 0.92;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25), 0 4px 16px rgba(0, 0, 0, 0.15);
+  border: 2px solid var(--primary);
+  transition: none;
+  will-change: transform;
+}
+
+/* Placeholder - the original card while dragging */
+.exercise-card.drag-placeholder {
+  opacity: 0.3;
+  border: 2px dashed var(--primary);
+  background: transparent;
+  box-shadow: none;
+}
+
+.exercise-card.drag-placeholder::before {
+  display: none;
+}
+
+/* During drag, cards should transition smoothly */
+.exercise-card {
+  will-change: transform;
+}
+
+@media (prefers-color-scheme: dark) {
+  .drag-handle:hover {
+    background: rgba(59, 130, 246, 0.12);
+  }
+
+  .drag-handle:active {
+    background: rgba(59, 130, 246, 0.18);
+  }
+
+  .drag-clone {
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* ============================================
+   AUTH ALERT (Inline Error Messages)
+   ============================================ */
+.auth-alert {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: all 0.3s var(--ease-out-expo);
+}
+
+.auth-alert.auth-alert-show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.auth-alert-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.auth-alert-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.auth-alert-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.auth-alert-text strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: #FCA5A5;
+  margin-bottom: 4px;
+  letter-spacing: -0.1px;
+}
+
+.auth-alert-text p {
+  margin: 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.45;
+}
+
+.auth-alert-close {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px 4px;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+  border-radius: 4px;
+}
+
+.auth-alert-close:hover {
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.auth-alert-action {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
+  color: var(--primary-light);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.auth-alert-action:hover {
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.25);
+}
+
+/* Form shake animation on error */
+@keyframes formShake {
+  0%, 100% { transform: translateX(0); }
+  10%, 50%, 90% { transform: translateX(-4px); }
+  30%, 70% { transform: translateX(4px); }
+}
+
+.form-shake {
+  animation: formShake 0.4s ease;
+}
+
+/* Disabled state for buttons during loading */
+.btn-block:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* ============================================
    UTILITIES
    ============================================ */
 .hidden {

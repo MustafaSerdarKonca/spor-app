@@ -36,6 +36,7 @@
 
             <!-- Login Form -->
             <form id="login-form">
+                <div id="login-alert" class="auth-alert" style="display:none;"></div>
                 <div class="form-group">
                     <input type="email" id="login-email" class="form-control" placeholder="E-posta" required
                         autocomplete="email">
@@ -44,7 +45,7 @@
                     <input type="password" id="login-password" class="form-control" placeholder="Şifre" required
                         autocomplete="current-password">
                 </div>
-                <button type="submit" class="btn-block">Giriş Yap</button>
+                <button type="submit" id="btn-login-submit" class="btn-block">Giriş Yap</button>
                 <div class="auth-divider">veya</div>
                 <button type="button" class="btn-block btn-google" id="btn-google-login">
                     <svg viewBox="0 0 48 48" width="24" height="24">
@@ -71,6 +72,7 @@
 
             <!-- Register Form -->
             <form id="register-form" style="display:none">
+                <div id="register-alert" class="auth-alert" style="display:none;"></div>
                 <div class="form-group">
                     <input type="email" id="reg-email" class="form-control" placeholder="E-posta" required
                         autocomplete="email">
@@ -79,7 +81,7 @@
                     <input type="password" id="reg-password" class="form-control" placeholder="Şifre" required
                         autocomplete="new-password">
                 </div>
-                <button type="submit" class="btn-block">Kayıt Ol</button>
+                <button type="submit" id="btn-register-submit" class="btn-block">Kayıt Ol</button>
                 <button type="button" class="btn-text" onclick="toggleAuthMode()">Zaten hesabın var mı? Giriş
                     Yap</button>
             </form>

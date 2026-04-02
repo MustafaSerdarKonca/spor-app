@@ -1,8 +1,8 @@
 importScripts('https://www.gstatic.com/firebasejs/11.0.2/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/11.0.2/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'spor-app-v13'; // Incremented version
-const LAST_UPDATED = '2026-04-02T23:30:00'; // Force byte difference
+const CACHE_NAME = 'spor-app-v15'; // Drag & drop reordering
+const LAST_UPDATED = '2026-04-03T00:05:00';
 
 const ASSETS = [
     './',
