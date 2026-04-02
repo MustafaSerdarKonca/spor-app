@@ -157,12 +157,13 @@ const renderExercises = () => {
         const card = document.createElement('div');
         card.className = 'exercise-card fade-in';
         card.style.animationDelay = `${index * 0.05}s`;
+        card.dataset.exerciseId = ex.id;
+        card.dataset.index = index;
 
         const historyBubbles = ex.history.slice(0, 3).map(entry => {
             let weight, dateStr;
             if (typeof entry === 'object' && entry !== null) {
                 weight = entry.weight;
-                // Format date: "10 Eki" always
                 try {
                     const date = new Date(entry.date);
                     dateStr = date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
@@ -171,7 +172,7 @@ const renderExercises = () => {
                 }
             } else {
                 weight = entry;
-                dateStr = ''; // Retroactive: could show '-' or nothing
+                dateStr = '';
             }
 
             return `
@@ -185,6 +186,7 @@ const renderExercises = () => {
 
         card.innerHTML = `
             <div class="card-content-wrapper">
+                <button class="drag-handle" aria-label="Sırayı değiştir" title="Basılı tutup sürükle">⠿</button>
                 ${imageHtml}
                 <div class="card-details">
                     <div class="card-header">
@@ -411,3 +413,232 @@ document.getElementById('btn-enable-notify')?.addEventListener('click', () => {
 
 // Expose global methods because modules isolate scope, but we use inline onclick="" in HTML
 // Alternatively, we could attach listeners in renderExercises, but this is simpler for MVP.
+
+// ============================================
+// DRAG & DROP REORDING
+// ============================================
+
+const initDragAndDrop = () => {
+    let draggedCard = null;
+    let dragClone = null;
+    let startY = 0;
+    let startX = 0;
+    let dragStartIndex = -1;
+    let currentHoverIndex = -1;
+    let longPressTimer = null;
+    let isDragging = false;
+
+    const LONG_PRESS_DURATION = 300; // ms to trigger drag on touch
+
+    const getCards = () => Array.from(exerciseList.querySelectorAll('.exercise-card'));
+
+    const getCardAtPoint = (x, y) => {
+        const cards = getCards();
+        for (const card of cards) {
+            if (card === draggedCard) continue;
+            const rect = card.getBoundingClientRect();
+            if (y >= rect.top && y <= rect.bottom) {
+                return card;
+            }
+        }
+        return null;
+    };
+
+    const startDrag = (card, clientX, clientY) => {
+        isDragging = true;
+        draggedCard = card;
+        dragStartIndex = parseInt(card.dataset.index);
+        currentHoverIndex = dragStartIndex;
+
+        // Create visual clone
+        const rect = card.getBoundingClientRect();
+        dragClone = card.cloneNode(true);
+        dragClone.className = 'exercise-card drag-clone';
+        dragClone.style.width = rect.width + 'px';
+        dragClone.style.left = rect.left + 'px';
+        dragClone.style.top = rect.top + 'px';
+        document.body.appendChild(dragClone);
+
+        // Mark original card
+        card.classList.add('drag-placeholder');
+
+        // Vibrate for haptic feedback (mobile)
+        if (navigator.vibrate) navigator.vibrate(30);
+
+        startY = clientY;
+        startX = clientX;
+    };
+
+    const moveDrag = (clientX, clientY) => {
+        if (!isDragging || !dragClone) return;
+
+        // Move clone
+        const dy = clientY - startY;
+        dragClone.style.transform = `translateY(${dy}px) scale(1.03)`;
+
+        // Check which card we're over
+        const targetCard = getCardAtPoint(clientX, clientY);
+        if (targetCard && targetCard !== draggedCard) {
+            const targetIndex = parseInt(targetCard.dataset.index);
+            if (targetIndex !== currentHoverIndex) {
+                currentHoverIndex = targetIndex;
+                reorderCards(dragStartIndex, targetIndex);
+            }
+        }
+    };
+
+    const endDrag = async () => {
+        if (!isDragging) return;
+        isDragging = false;
+
+        // Remove clone
+        if (dragClone) {
+            dragClone.remove();
+            dragClone = null;
+        }
+
+        // Remove placeholder class
+        if (draggedCard) {
+            draggedCard.classList.remove('drag-placeholder');
+        }
+
+        // If order changed, save
+        if (dragStartIndex !== currentHoverIndex && currentHoverIndex >= 0) {
+            // Reorder the actual data array
+            const movedItem = currentDayData.exercises.splice(dragStartIndex, 1)[0];
+            currentDayData.exercises.splice(currentHoverIndex, 0, movedItem);
+
+            if (currentUser) {
+                await saveDay(currentUser.uid, currentDayData);
+            }
+
+            // Re-render with new order
+            renderExercises();
+            showToast('✅ Sıralama güncellendi');
+        } else {
+            // Reset styles
+            getCards().forEach(c => {
+                c.style.transition = '';
+                c.style.transform = '';
+            });
+        }
+
+        draggedCard = null;
+        dragStartIndex = -1;
+        currentHoverIndex = -1;
+    };
+
+    const reorderCards = (fromIndex, toIndex) => {
+        const cards = getCards();
+
+        // Visual reorder: swap DOM positions smoothly
+        cards.forEach(card => {
+            card.style.transition = 'transform 0.2s ease';
+        });
+
+        // Calculate visual offsets
+        if (fromIndex < toIndex) {
+            // Moving down: shift cards between from+1..to UP
+            cards.forEach(card => {
+                const idx = parseInt(card.dataset.index);
+                if (idx > fromIndex && idx <= toIndex) {
+                    const cardHeight = draggedCard.offsetHeight + 14; // 14px margin
+                    card.style.transform = `translateY(-${cardHeight}px)`;
+                } else if (idx === fromIndex) {
+                    const totalShift = cards.slice(fromIndex + 1, toIndex + 1)
+                        .reduce((sum, c) => sum + c.offsetHeight + 14, 0);
+                    card.style.transform = `translateY(${totalShift}px)`;
+                } else {
+                    card.style.transform = '';
+                }
+            });
+        } else {
+            // Moving up: shift cards between to..from-1 DOWN
+            cards.forEach(card => {
+                const idx = parseInt(card.dataset.index);
+                if (idx >= toIndex && idx < fromIndex) {
+                    const cardHeight = draggedCard.offsetHeight + 14;
+                    card.style.transform = `translateY(${cardHeight}px)`;
+                } else if (idx === fromIndex) {
+                    const totalShift = cards.slice(toIndex, fromIndex)
+                        .reduce((sum, c) => sum + c.offsetHeight + 14, 0);
+                    card.style.transform = `translateY(-${totalShift}px)`;
+                } else {
+                    card.style.transform = '';
+                }
+            });
+        }
+    };
+
+    const cancelDrag = () => {
+        if (longPressTimer) {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+        }
+        if (isDragging) endDrag();
+    };
+
+    // --- Touch Events ---
+    exerciseList.addEventListener('touchstart', (e) => {
+        const handle = e.target.closest('.drag-handle');
+        if (!handle) return;
+
+        const card = handle.closest('.exercise-card');
+        if (!card) return;
+
+        e.preventDefault();
+        const touch = e.touches[0];
+
+        longPressTimer = setTimeout(() => {
+            startDrag(card, touch.clientX, touch.clientY);
+        }, LONG_PRESS_DURATION);
+    }, { passive: false });
+
+    exerciseList.addEventListener('touchmove', (e) => {
+        if (longPressTimer && !isDragging) {
+            // User is scrolling, cancel long press
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+            return;
+        }
+        if (!isDragging) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        moveDrag(touch.clientX, touch.clientY);
+    }, { passive: false });
+
+    exerciseList.addEventListener('touchend', () => {
+        if (longPressTimer) {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+        }
+        endDrag();
+    });
+
+    exerciseList.addEventListener('touchcancel', cancelDrag);
+
+    // --- Mouse Events ---
+    exerciseList.addEventListener('mousedown', (e) => {
+        const handle = e.target.closest('.drag-handle');
+        if (!handle) return;
+
+        const card = handle.closest('.exercise-card');
+        if (!card) return;
+
+        e.preventDefault();
+        startDrag(card, e.clientX, e.clientY);
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        moveDrag(e.clientX, e.clientY);
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (isDragging) endDrag();
+    });
+};
+
+// Initialize drag and drop
+initDragAndDrop();

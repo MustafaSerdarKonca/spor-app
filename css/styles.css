@@ -1044,6 +1044,95 @@ main {
 }
 
 /* ============================================
+   DRAG & DROP REORDERING
+   ============================================ */
+.drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  min-height: 48px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 20px;
+  cursor: grab;
+  padding: 0;
+  margin: 0;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  letter-spacing: 1px;
+  opacity: 0.5;
+}
+
+.drag-handle:hover {
+  opacity: 1;
+  background: rgba(59, 130, 246, 0.08);
+  color: var(--primary);
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+  opacity: 1;
+  color: var(--primary);
+  background: rgba(59, 130, 246, 0.12);
+}
+
+/* Update card content wrapper to include drag handle */
+.card-content-wrapper {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+/* Drag clone - floating elevated card */
+.drag-clone {
+  position: fixed;
+  z-index: 5000;
+  pointer-events: none;
+  opacity: 0.92;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25), 0 4px 16px rgba(0, 0, 0, 0.15);
+  border: 2px solid var(--primary);
+  transition: none;
+  will-change: transform;
+}
+
+/* Placeholder - the original card while dragging */
+.exercise-card.drag-placeholder {
+  opacity: 0.3;
+  border: 2px dashed var(--primary);
+  background: transparent;
+  box-shadow: none;
+}
+
+.exercise-card.drag-placeholder::before {
+  display: none;
+}
+
+/* During drag, cards should transition smoothly */
+.exercise-card {
+  will-change: transform;
+}
+
+@media (prefers-color-scheme: dark) {
+  .drag-handle:hover {
+    background: rgba(59, 130, 246, 0.12);
+  }
+
+  .drag-handle:active {
+    background: rgba(59, 130, 246, 0.18);
+  }
+
+  .drag-clone {
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* ============================================
    AUTH ALERT (Inline Error Messages)
    ============================================ */
 .auth-alert {
