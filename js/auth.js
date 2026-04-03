@@ -165,12 +165,20 @@ window.toggleAuthMode = () => {
     hideAuthAlert(loginAlert);
     hideAuthAlert(registerAlert);
 
+    const subtitle = document.getElementById('auth-subtitle');
+
     if (isRegistering) {
         loginForm.style.display = 'none';
         registerForm.style.display = 'block';
+        registerForm.classList.add('form-slide-in');
+        setTimeout(() => registerForm.classList.remove('form-slide-in'), 400);
+        if (subtitle) subtitle.textContent = 'Hemen kayıt ol, antrenmana başla! 🚀';
     } else {
         loginForm.style.display = 'block';
         registerForm.style.display = 'none';
+        loginForm.classList.add('form-slide-in');
+        setTimeout(() => loginForm.classList.remove('form-slide-in'), 400);
+        if (subtitle) subtitle.textContent = 'Gücünü Takip Et 💪';
     }
 };
 
@@ -207,32 +215,8 @@ export const setupAuthListeners = () => {
         }
     });
 
-    // Register
-    registerForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('reg-email').value;
-        const pass = document.getElementById('reg-password').value;
-        const submitBtn = document.getElementById('btn-register-submit');
-
-        // Hide previous alert
-        hideAuthAlert(registerAlert);
-
-        // Show loading state
-        const originalText = submitBtn.textContent;
-        submitBtn.textContent = 'Kayıt olunuyor...';
-        submitBtn.disabled = true;
-
-        try {
-            await createUserWithEmailAndPassword(auth, email, pass);
-            // Success
-        } catch (error) {
-            console.error('Register error:', error.code, error.message);
-            showAuthAlert(registerAlert, error.code, 'register');
-        } finally {
-            submitBtn.textContent = originalText;
-            submitBtn.disabled = false;
-        }
-    });
+    // Register form is now handled by register.js module
+    // (setupRegistration() in register.js takes over the register-form submit event)
 
     // Google
     if (btnGoogle) {
