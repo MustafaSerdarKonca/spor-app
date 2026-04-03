@@ -1133,6 +1133,584 @@ main {
 }
 
 /* ============================================
+   REGISTRATION & ONBOARDING COMPONENTS
+   ============================================ */
+
+/* --- Screen Reader Only --- */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- Password Input Wrapper --- */
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper .form-control {
+  padding-right: 48px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 6px;
+  line-height: 1;
+  opacity: 0.5;
+  transition: opacity 0.15s ease;
+  z-index: 2;
+}
+
+.password-toggle:hover {
+  opacity: 1;
+}
+
+/* --- Password Strength Meter --- */
+.password-strength-meter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.strength-bar-track {
+  flex: 1;
+  height: 4px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.strength-bar-fill {
+  height: 100%;
+  width: 0;
+  border-radius: 4px;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.strength-label {
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 60px;
+  text-align: right;
+  transition: color 0.3s ease;
+}
+
+/* --- Password Match Indicator --- */
+.password-match-indicator {
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 6px;
+  transition: color 0.2s ease;
+}
+
+.match-ok {
+  color: #10B981;
+}
+
+.match-error {
+  color: #EF4444;
+}
+
+/* --- Form Label Inline --- */
+.form-label-inline {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* --- Custom Checkbox --- */
+.checkbox-group {
+  margin: 4px 0;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255,255,255,0.6);
+}
+
+.checkbox-label input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.checkbox-custom {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-radius: 5px;
+  background: rgba(255,255,255,0.04);
+  margin-top: 1px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkbox-custom {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkbox-custom::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.checkbox-text a {
+  color: var(--primary-light);
+  text-decoration: underline;
+}
+
+/* --- Trust Badges --- */
+.trust-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 16px;
+  padding: 12px 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--radius-md);
+}
+
+.trust-badge {
+  font-size: 12px;
+  color: rgba(255,255,255,0.45);
+  line-height: 1.5;
+}
+
+/* --- Social Proof --- */
+.social-proof {
+  text-align: center;
+  margin-top: 14px;
+  padding: 10px;
+  background: linear-gradient(135deg, rgba(59,130,246,0.06), rgba(16,185,129,0.06));
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.55);
+}
+
+/* --- Auth Switch Button --- */
+.auth-switch-btn {
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+.auth-switch-btn strong {
+  color: var(--primary-light);
+}
+
+/* --- Auth Tagline --- */
+.auth-tagline {
+  text-align: center;
+  margin-top: 20px;
+  padding: 0 20px;
+}
+
+.auth-tagline p {
+  font-style: italic;
+  font-size: 13px;
+  color: rgba(255,255,255,0.3);
+  margin: 0;
+}
+
+/* --- Apple Sign In (future) --- */
+.btn-apple {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-apple:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-apple svg {
+  opacity: 0.7;
+}
+
+/* --- Register Button Premium --- */
+.btn-register {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+/* --- Button Spinner --- */
+.btn-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* --- Form Slide-In Animation --- */
+@keyframes formSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.form-slide-in {
+  animation: formSlideIn 0.35s var(--ease-out-expo);
+}
+
+/* --- Field Error Messages --- */
+.field-error-msg {
+  font-size: 12px;
+  color: #EF4444;
+  margin-top: 5px;
+  animation: fadeInUp 0.25s ease;
+}
+
+.input-error {
+  border-color: #EF4444 !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15) !important;
+}
+
+/* ============================================
+   ONBOARDING WIZARD
+   ============================================ */
+.onboarding-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(11, 15, 26, 0.95);
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.onboarding-overlay.show {
+  opacity: 1;
+}
+
+.onboarding-card {
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  max-width: 440px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 28px 24px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.3);
+}
+
+.onboarding-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.step-progress {
+  display: flex;
+  gap: 6px;
+}
+
+.step-dot {
+  width: 28px;
+  height: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.step-dot.active {
+  background: var(--primary);
+}
+
+.step-dot.current {
+  background: var(--primary);
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+}
+
+.step-counter {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.35);
+}
+
+.onboarding-skip {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.4);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.onboarding-skip:hover {
+  color: var(--primary-light);
+  background: rgba(59,130,246,0.08);
+}
+
+/* --- Onboarding Steps --- */
+.onboarding-step {
+  display: none;
+}
+
+.onboarding-step.active {
+  display: block;
+  animation: fadeInUp 0.35s var(--ease-out-expo);
+}
+
+.onboarding-title {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0 0 6px;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.onboarding-subtitle {
+  font-size: 14px;
+  color: rgba(255,255,255,0.5);
+  margin: 0 0 20px;
+}
+
+.onboarding-field-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+
+.onboarding-fields-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 16px;
+  margin-bottom: 20px;
+}
+
+.onboarding-fields-row label {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 4px;
+  display: block;
+}
+
+/* --- Selection Cards --- */
+.selection-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.selection-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px 8px;
+  background: rgba(255,255,255,0.04);
+  border: 2px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
+  color: rgba(255,255,255,0.7);
+}
+
+.selection-card:hover {
+  border-color: rgba(59,130,246,0.3);
+  background: rgba(59,130,246,0.06);
+}
+
+.selection-card.selected {
+  border-color: var(--primary);
+  background: rgba(59,130,246,0.12);
+  color: white;
+  box-shadow: 0 0 16px rgba(59,130,246,0.15);
+}
+
+.selection-icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.selection-text {
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.selection-card-wide {
+  flex-direction: row;
+  justify-content: flex-start;
+  padding: 12px 16px;
+  gap: 12px;
+}
+
+.selection-card-wide .selection-icon {
+  font-size: 20px;
+}
+
+.selection-card-wide .selection-text {
+  font-size: 13px;
+}
+
+/* --- Onboarding Nav Row --- */
+.onboarding-nav-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn-secondary {
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  color: rgba(255,255,255,0.7) !important;
+  box-shadow: none !important;
+}
+
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.1) !important;
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #10B981, #06B6D4) !important;
+}
+
+.btn-success:hover {
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35) !important;
+}
+
+/* --- Registration Success Animation --- */
+.reg-success-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(11, 15, 26, 0.96);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.reg-success-overlay.show {
+  opacity: 1;
+}
+
+.reg-success-content {
+  text-align: center;
+}
+
+.reg-success-content h3 {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 16px 0 6px;
+  color: #10B981;
+}
+
+.reg-success-content p {
+  font-size: 14px;
+  color: rgba(255,255,255,0.5);
+  margin: 0;
+}
+
+/* Checkmark animation */
+.checkmark-circle {
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  animation: checkmarkStroke 0.6s ease 0.1s forwards;
+}
+
+.checkmark-check {
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: checkmarkStroke 0.3s ease 0.5s forwards;
+}
+
+@keyframes checkmarkStroke {
+  to { stroke-dashoffset: 0; }
+}
+
+/* --- Select Input (for onboarding) --- */
+select.form-control {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='silver'><path d='M0 0l6 8 6-8'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+
+/* ============================================
    AUTH ALERT (Inline Error Messages)
    ============================================ */
 .auth-alert {

@@ -4,6 +4,7 @@
 import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 import { setupAuthListeners, updateUIForUser } from './auth.js';
+import { setupRegistration, checkOnboardingNeeded } from './register.js';
 import { subscribeUserToPush, listenForMessages } from './notifications.js';
 // We currently keep using local DB logic for operations, but will guard it with auth state.
 // Future step: Switch 'db.js' to use Firestore 'db' instance.
@@ -58,6 +59,7 @@ const exerciseForm = document.getElementById('exercise-form');
 // Initialization
 const init = async () => {
     setupAuthListeners();
+    setupRegistration();
 
     // Listen to Auth State
     onAuthStateChanged(auth, async (user) => {
@@ -66,6 +68,11 @@ const init = async () => {
 
         if (user) {
             console.log("Logged in:", user.email);
+
+            // Check if onboarding is needed (new user who hasn't completed it)
+            const needsOnboarding = await checkOnboardingNeeded(user.uid);
+            if (needsOnboarding) return; // Onboarding will handle transition
+
             // Initialize App
             setupTabs();
             // Determine current day

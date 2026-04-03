@@ -1,8 +1,8 @@
 importScripts('https://www.gstatic.com/firebasejs/11.0.2/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/11.0.2/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'spor-app-v15'; // Drag & drop reordering
-const LAST_UPDATED = '2026-04-03T00:05:00';
+const CACHE_NAME = 'spor-app-v16'; // Premium registration & onboarding
+const LAST_UPDATED = '2026-04-03T09:20:00';
 
 const ASSETS = [
     './',
@@ -11,6 +11,7 @@ const ASSETS = [
     './js/app.js',
     './js/db.js',
     './js/auth.js',
+    './js/register.js',
     './js/firebase-config.js',
     './js/notifications.js',
     './manifest.json'
