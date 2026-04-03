@@ -1738,6 +1738,109 @@ select.form-control {
 }
 
 /* ============================================
+   EMAIL VERIFICATION GATE
+   ============================================ */
+.email-verify-gate {
+  text-align: center;
+  padding: 10px 0;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.4s var(--ease-out-expo);
+}
+
+.email-verify-gate.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.verify-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  line-height: 1;
+}
+
+.verify-title {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0 0 10px;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.verify-desc {
+  font-size: 14px;
+  color: rgba(255,255,255,0.55);
+  margin: 0 0 20px;
+  line-height: 1.5;
+}
+
+.verify-desc strong {
+  color: var(--primary-light);
+  word-break: break-all;
+}
+
+.verify-steps {
+  text-align: left;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  margin-bottom: 20px;
+}
+
+.verify-step {
+  font-size: 13px;
+  color: rgba(255,255,255,0.6);
+  padding: 6px 0;
+  line-height: 1.4;
+}
+
+.verify-step + .verify-step {
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+
+.verify-status {
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  margin: 12px 0;
+  animation: fadeInUp 0.25s ease;
+}
+
+.verify-success {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10B981;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.verify-pending {
+  background: rgba(245, 158, 11, 0.1);
+  color: #F59E0B;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.verify-error {
+  background: rgba(239, 68, 68, 0.1);
+  color: #EF4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.verify-resend {
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.verify-spam-note {
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  margin: 12px 0 0;
+  font-style: italic;
+}
+
+/* ============================================
    LEGAL MODAL (Terms / KVKK)
    ============================================ */
 .legal-modal-overlay {

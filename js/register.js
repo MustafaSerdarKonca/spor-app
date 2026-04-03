@@ -262,13 +262,8 @@ export const setupRegistration = () => {
             });
 
             // Send email verification
-            try {
-                await sendEmailVerification(cred.user);
-                console.log('Verification email sent to:', formData.email);
-            } catch (verifyErr) {
-                console.warn('Email verification send failed:', verifyErr);
-                // Non-blocking: continue even if verification email fails
-            }
+            await sendEmailVerification(cred.user);
+            console.log('Verification email sent to:', formData.email);
 
             // Save initial profile
             await setDoc(doc(db, "users", cred.user.uid, "profile", "info"), {
@@ -279,13 +274,8 @@ export const setupRegistration = () => {
                 onboardingComplete: false
             }, { merge: true });
 
-            // Show success animation
-            showRegistrationSuccess(formData.email);
-
-            // Show onboarding after a brief delay
-            setTimeout(() => {
-                showOnboarding(cred.user.uid);
-            }, 2500);
+            // Show email verification gate — user MUST verify before continuing
+            showEmailVerificationGate(cred.user, formData.email);
 
         } catch (error) {
             console.error('Register error:', error.code, error.message);
@@ -332,32 +322,157 @@ const getRegisterErrorMessage = (code) => {
 };
 
 // ============================================
-// SUCCESS ANIMATION
+// EMAIL VERIFICATION GATE
 // ============================================
-const showRegistrationSuccess = (email = '') => {
+let verificationPollTimer = null;
+
+const showEmailVerificationGate = (user, email) => {
     const authCard = document.querySelector('.auth-card');
     if (!authCard) return;
 
-    // Create success overlay inside card
-    const successEl = document.createElement('div');
-    successEl.className = 'reg-success-overlay';
-    successEl.innerHTML = `
-        <div class="reg-success-content">
-            <div class="reg-success-checkmark">
-                <svg viewBox="0 0 52 52" width="72" height="72">
-                    <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none" stroke="#10B981" stroke-width="2"/>
-                    <path class="checkmark-check" fill="none" stroke="#10B981" stroke-width="3" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
-                </svg>
-            </div>
-            <h3>Hoş Geldin! 🎉</h3>
-            <p>Hesabın başarıyla oluşturuldu.</p>
-            ${email ? `<p class="reg-verify-note">📧 <strong>${email}</strong> adresine doğrulama e-postası gönderdik. Lütfen gelen kutunu kontrol et.</p>` : ''}
+    // Hide both forms
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    if (loginForm) loginForm.style.display = 'none';
+    if (registerForm) registerForm.style.display = 'none';
+
+    // Update subtitle
+    const subtitle = document.getElementById('auth-subtitle');
+    if (subtitle) subtitle.textContent = 'E-posta Do\u011frulama';
+
+    // Create verification gate UI
+    const gateEl = document.createElement('div');
+    gateEl.id = 'email-verify-gate';
+    gateEl.className = 'email-verify-gate';
+    gateEl.innerHTML = `
+        <div class="verify-icon">\u2709\uFE0F</div>
+        <h3 class="verify-title">E-postan\u0131 Do\u011frula</h3>
+        <p class="verify-desc">
+            <strong>${email}</strong> adresine bir do\u011frulama ba\u011flant\u0131s\u0131 g\u00f6nderdik.
+        </p>
+        <div class="verify-steps">
+            <div class="verify-step">\u2776 E-posta kutunu kontrol et</div>
+            <div class="verify-step">\u2777 Do\u011frulama ba\u011flant\u0131s\u0131na t\u0131kla</div>
+            <div class="verify-step">\u2778 Buraya d\u00f6n\u00fcp a\u015fa\u011f\u0131daki butona t\u0131kla</div>
         </div>
+        <button type="button" id="btn-verify-check" class="btn-block btn-success">
+            \u2705 Do\u011frulad\u0131m, Kontrol Et
+        </button>
+        <div id="verify-status" class="verify-status" style="display:none;"></div>
+        <button type="button" id="btn-verify-resend" class="btn-text verify-resend">
+            \uD83D\uDD04 Do\u011frulama e-postas\u0131n\u0131 tekrar g\u00f6nder
+        </button>
+        <p class="verify-spam-note">Spam/\u00f6nemsiz klas\u00f6r\u00fcn\u00fc de kontrol etmeyi unutma!</p>
     `;
-    authCard.appendChild(successEl);
+    authCard.appendChild(gateEl);
 
     // Animate in
-    requestAnimationFrame(() => successEl.classList.add('show'));
+    requestAnimationFrame(() => gateEl.classList.add('show'));
+
+    // --- Check Verification Button ---
+    const btnCheck = document.getElementById('btn-verify-check');
+    const statusEl = document.getElementById('verify-status');
+
+    btnCheck.addEventListener('click', async () => {
+        btnCheck.innerHTML = '<span class="btn-spinner"></span> Kontrol ediliyor...';
+        btnCheck.disabled = true;
+
+        try {
+            await user.reload();
+            if (user.emailVerified) {
+                // Update profile
+                await setDoc(doc(db, "users", user.uid, "profile", "info"), {
+                    emailVerified: true
+                }, { merge: true });
+
+                // Show success
+                statusEl.style.display = 'block';
+                statusEl.className = 'verify-status verify-success';
+                statusEl.textContent = '\u2705 E-posta do\u011fruland\u0131! Y\u00f6nlendiriliyorsun...';
+
+                // Stop polling
+                if (verificationPollTimer) clearInterval(verificationPollTimer);
+
+                // Proceed to onboarding after brief delay
+                setTimeout(() => {
+                    gateEl.remove();
+                    showOnboarding(user.uid);
+                }, 1500);
+            } else {
+                statusEl.style.display = 'block';
+                statusEl.className = 'verify-status verify-pending';
+                statusEl.textContent = '\u23F3 Hen\u00fcz do\u011frulanmam\u0131\u015f. E-postadaki ba\u011flant\u0131ya t\u0131klad\u0131\u011f\u0131ndan emin ol.';
+                btnCheck.innerHTML = '\u2705 Do\u011frulad\u0131m, Kontrol Et';
+                btnCheck.disabled = false;
+            }
+        } catch (err) {
+            console.error('Verification check failed:', err);
+            statusEl.style.display = 'block';
+            statusEl.className = 'verify-status verify-error';
+            statusEl.textContent = '\u274C Kontrol s\u0131ras\u0131nda hata olu\u015ftu. Tekrar deneyin.';
+            btnCheck.innerHTML = '\u2705 Do\u011frulad\u0131m, Kontrol Et';
+            btnCheck.disabled = false;
+        }
+    });
+
+    // --- Resend Button ---
+    const btnResend = document.getElementById('btn-verify-resend');
+    let resendCooldown = false;
+
+    btnResend.addEventListener('click', async () => {
+        if (resendCooldown) return;
+        resendCooldown = true;
+        btnResend.textContent = '\u23F3 G\u00f6nderiliyor...';
+
+        try {
+            await sendEmailVerification(user);
+            btnResend.textContent = '\u2705 Tekrar g\u00f6nderildi!';
+            setTimeout(() => {
+                btnResend.textContent = '\uD83D\uDD04 Do\u011frulama e-postas\u0131n\u0131 tekrar g\u00f6nder';
+                resendCooldown = false;
+            }, 30000); // 30 sec cooldown
+        } catch (err) {
+            console.error('Resend failed:', err);
+            btnResend.textContent = '\u274C G\u00f6nderilemedi, daha sonra deneyin';
+            setTimeout(() => {
+                btnResend.textContent = '\uD83D\uDD04 Do\u011frulama e-postas\u0131n\u0131 tekrar g\u00f6nder';
+                resendCooldown = false;
+            }, 10000);
+        }
+    });
+
+    // --- Auto-poll every 5 seconds ---
+    verificationPollTimer = setInterval(async () => {
+        try {
+            await user.reload();
+            if (user.emailVerified) {
+                clearInterval(verificationPollTimer);
+
+                await setDoc(doc(db, "users", user.uid, "profile", "info"), {
+                    emailVerified: true
+                }, { merge: true });
+
+                statusEl.style.display = 'block';
+                statusEl.className = 'verify-status verify-success';
+                statusEl.textContent = '\u2705 E-posta do\u011fruland\u0131! Y\u00f6nlendiriliyorsun...';
+
+                setTimeout(() => {
+                    gateEl.remove();
+                    showOnboarding(user.uid);
+                }, 1500);
+            }
+        } catch (e) {
+            // Silent fail for polling
+        }
+    }, 5000);
+};
+
+// ============================================
+// SUCCESS ANIMATION (no longer used for email note, kept for future)
+// ============================================
+const showRegistrationSuccess = () => {
+    // This is now replaced by the verification gate
+    // Kept as a no-op for backward compatibility
 };
 
 // ============================================
