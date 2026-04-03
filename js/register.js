@@ -5,7 +5,8 @@
 import { auth, db } from './firebase-config.js';
 import {
     createUserWithEmailAndPassword,
-    updateProfile
+    updateProfile,
+    sendEmailVerification
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
@@ -260,21 +261,31 @@ export const setupRegistration = () => {
                 displayName: formData.name
             });
 
+            // Send email verification
+            try {
+                await sendEmailVerification(cred.user);
+                console.log('Verification email sent to:', formData.email);
+            } catch (verifyErr) {
+                console.warn('Email verification send failed:', verifyErr);
+                // Non-blocking: continue even if verification email fails
+            }
+
             // Save initial profile
             await setDoc(doc(db, "users", cred.user.uid, "profile", "info"), {
                 displayName: formData.name,
                 email: formData.email,
+                emailVerified: false,
                 createdAt: new Date().toISOString(),
                 onboardingComplete: false
             }, { merge: true });
 
             // Show success animation
-            showRegistrationSuccess();
+            showRegistrationSuccess(formData.email);
 
             // Show onboarding after a brief delay
             setTimeout(() => {
                 showOnboarding(cred.user.uid);
-            }, 1800);
+            }, 2500);
 
         } catch (error) {
             console.error('Register error:', error.code, error.message);
@@ -323,7 +334,7 @@ const getRegisterErrorMessage = (code) => {
 // ============================================
 // SUCCESS ANIMATION
 // ============================================
-const showRegistrationSuccess = () => {
+const showRegistrationSuccess = (email = '') => {
     const authCard = document.querySelector('.auth-card');
     if (!authCard) return;
 
@@ -340,6 +351,7 @@ const showRegistrationSuccess = () => {
             </div>
             <h3>Hoş Geldin! 🎉</h3>
             <p>Hesabın başarıyla oluşturuldu.</p>
+            ${email ? `<p class="reg-verify-note">📧 <strong>${email}</strong> adresine doğrulama e-postası gönderdik. Lütfen gelen kutunu kontrol et.</p>` : ''}
         </div>
     `;
     authCard.appendChild(successEl);
@@ -496,5 +508,91 @@ export const checkOnboardingNeeded = async (userId) => {
     } catch (e) {
         console.error('Failed to check onboarding:', e);
         return false;
+    }
+};
+
+// ============================================
+// LEGAL MODALS (Terms / KVKK)
+// ============================================
+const LEGAL_CONTENT = {
+    terms: {
+        title: 'Kullanım Koşulları',
+        body: `
+<h4>1. Genel Hükümler</h4>
+<p>Spor App uygulamasını kullanarak aşağıdaki koşulları kabul etmiş olursunuz.</p>
+
+<h4>2. Hizmet Tanımı</h4>
+<p>Spor App, kişisel antrenman takibi yapmanızı sağlayan bir mobil uygulamadır. Egzersizlerinizi, ağırlıklarınızı ve gelişiminizi kaydetmenize olanak tanır.</p>
+
+<h4>3. Kullanıcı Yükümlülükleri</h4>
+<p>Doğru ve güncel bilgilerle kayıt olmayı, hesap güvenliğinizi sağlamayı ve uygulamayı yasal amaçlarla kullanmayı taahhüt edersiniz.</p>
+
+<h4>4. Veri Sahipliği</h4>
+<p>Girdiğiniz antrenman verileri size aittir. Hesabınızı sildiğinizde tüm verileriniz kalıcı olarak kaldırılır.</p>
+
+<h4>5. Sorumluluk Reddi</h4>
+<p>Uygulama tıbbi tavsiye sağlamaz. Antrenman programlarınızı bir uzmanla planlamanız önerilir. Spor App, yanlış kullanımdan doğan sonuçlardan sorumlu değildir.</p>
+
+<h4>6. Değişiklikler</h4>
+<p>Bu koşullar önceden bildirimde bulunmak suretiyle güncellenebilir.</p>
+        `
+    },
+    kvkk: {
+        title: 'KVKK Aydınlatma Metni',
+        body: `
+<h4>Kişisel Verilerin Korunması</h4>
+<p>6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında, veri sorumlusu sıfatıyla aşağıdaki bilgilendirmeyi yaparız.</p>
+
+<h4>Toplanan Veriler</h4>
+<ul>
+<li><strong>Kimlik Bilgileri:</strong> Ad soyad, e-posta adresi</li>
+<li><strong>Sağlık/Fitness Verileri:</strong> Yaş, boy, kilo, antrenman hedefleri, egzersiz kayıtları</li>
+<li><strong>Kullanım Verileri:</strong> Giriş zamanları, cihaz bilgileri</li>
+</ul>
+
+<h4>Verilerin İşlenme Amaçları</h4>
+<ul>
+<li>Antrenman takip hizmetinin sunulması</li>
+<li>Kişiselleştirilmiş deneyim sağlanması</li>
+<li>Hesap güvenliğinin korunması</li>
+</ul>
+
+<h4>Verilerin Saklanması</h4>
+<p>Verileriniz Google Firebase altyapısında şifreli olarak saklanır. Üçüncü taraflarla paylaşılmaz.</p>
+
+<h4>Haklarınız</h4>
+<ul>
+<li>Verilerinize erişim talep etme</li>
+<li>Verilerinizin düzeltilmesini isteme</li>
+<li>Verilerinizin silinmesini talep etme</li>
+<li>Veri işlemeye itiraz etme</li>
+</ul>
+
+<p>Haklarınızı kullanmak için uygulama içi destek bölümünden bizimle iletişime geçebilirsiniz.</p>
+        `
+    }
+};
+
+window.showLegalModal = (type) => {
+    const content = LEGAL_CONTENT[type];
+    if (!content) return;
+
+    const overlay = document.getElementById('legal-modal-overlay');
+    const title = document.getElementById('legal-modal-title');
+    const body = document.getElementById('legal-modal-body');
+
+    if (!overlay || !title || !body) return;
+
+    title.textContent = content.title;
+    body.innerHTML = content.body;
+    overlay.style.display = 'flex';
+    requestAnimationFrame(() => overlay.classList.add('show'));
+};
+
+window.closeLegalModal = () => {
+    const overlay = document.getElementById('legal-modal-overlay');
+    if (overlay) {
+        overlay.classList.remove('show');
+        setTimeout(() => { overlay.style.display = 'none'; }, 300);
     }
 };

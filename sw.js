@@ -1,8 +1,8 @@
 importScripts('https://www.gstatic.com/firebasejs/11.0.2/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/11.0.2/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'spor-app-v16'; // Premium registration & onboarding
-const LAST_UPDATED = '2026-04-03T09:20:00';
+const CACHE_NAME = 'spor-app-v17'; // Bugfix: centering, KVKK modals, email verification
+const LAST_UPDATED = '2026-04-03T09:40:00';
 
 const ASSETS = [
     './',

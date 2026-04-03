@@ -134,8 +134,8 @@
                         <input type="checkbox" id="reg-kvkk" required>
                         <span class="checkbox-custom"></span>
                         <span class="checkbox-text">
-                            <a href="#" onclick="event.preventDefault()">Kullanım koşullarını</a> ve
-                            <a href="#" onclick="event.preventDefault()">KVKK aydınlatma metnini</a> okudum, kabul ediyorum.
+                            <a href="#" onclick="event.preventDefault(); showLegalModal('terms')">Kullanım koşullarını</a> ve
+                            <a href="#" onclick="event.preventDefault(); showLegalModal('kvkk')">KVKK aydınlatma metnini</a> okudum, kabul ediyorum.
                         </span>
                     </label>
                 </div>
@@ -165,6 +165,18 @@
         <!-- Motivational tagline below card -->
         <div class="auth-tagline">
             <p>"Her tekrar seni ileri taşır."</p>
+        </div>
+    </div>
+
+    <!-- Legal Modal (Terms / KVKK) -->
+    <div id="legal-modal-overlay" class="legal-modal-overlay" style="display:none;" onclick="if(event.target===this)closeLegalModal()">
+        <div class="legal-modal-card">
+            <div class="legal-modal-header">
+                <h3 id="legal-modal-title"></h3>
+                <button type="button" class="btn-icon" onclick="closeLegalModal()">✕</button>
+            </div>
+            <div id="legal-modal-body" class="legal-modal-body"></div>
+            <button type="button" class="btn-block" onclick="closeLegalModal()">Anladım</button>
         </div>
     </div>
 

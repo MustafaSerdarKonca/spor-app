@@ -801,6 +801,7 @@ main {
    ============================================ */
 #auth-container {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
@@ -1262,14 +1263,18 @@ main {
 
 .checkbox-custom {
   flex-shrink: 0;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  min-width: 22px;
+  height: 22px;
   border: 2px solid rgba(255,255,255,0.2);
-  border-radius: 5px;
+  border-radius: 6px;
   background: rgba(255,255,255,0.04);
   margin-top: 1px;
   transition: all 0.2s ease;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .checkbox-label input[type="checkbox"]:checked + .checkbox-custom {
@@ -1708,6 +1713,117 @@ select.form-control {
   background-repeat: no-repeat;
   background-position: right 14px center;
   padding-right: 36px;
+}
+
+/* --- Email Verification Note --- */
+.reg-verify-note {
+  margin-top: 12px !important;
+  font-size: 13px !important;
+  color: rgba(255,255,255,0.55) !important;
+  background: rgba(59,130,246,0.08);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  line-height: 1.5;
+}
+
+.reg-verify-note strong {
+  color: var(--primary-light);
+  word-break: break-all;
+}
+
+/* --- Auth Tagline z-index --- */
+.auth-tagline {
+  position: relative;
+  z-index: 2;
+}
+
+/* ============================================
+   LEGAL MODAL (Terms / KVKK)
+   ============================================ */
+.legal-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(11, 15, 26, 0.9);
+  z-index: 9500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.legal-modal-overlay.show {
+  opacity: 1;
+}
+
+.legal-modal-card {
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  max-width: 480px;
+  width: 100%;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.3);
+  animation: fadeInUp 0.3s var(--ease-out-expo);
+}
+
+.legal-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.legal-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+}
+
+.legal-modal-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  flex: 1;
+  font-size: 14px;
+  color: rgba(255,255,255,0.6);
+  line-height: 1.7;
+}
+
+.legal-modal-body h4 {
+  color: rgba(255,255,255,0.85);
+  font-size: 15px;
+  font-weight: 700;
+  margin: 18px 0 8px;
+}
+
+.legal-modal-body h4:first-child {
+  margin-top: 0;
+}
+
+.legal-modal-body p {
+  margin: 0 0 12px;
+}
+
+.legal-modal-body ul {
+  margin: 0 0 12px;
+  padding-left: 20px;
+}
+
+.legal-modal-body li {
+  margin-bottom: 6px;
+}
+
+.legal-modal-card > .btn-block {
+  margin: 16px 24px 20px;
+  flex-shrink: 0;
 }
 
 /* ============================================
