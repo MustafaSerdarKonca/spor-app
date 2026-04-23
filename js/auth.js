@@ -4,7 +4,8 @@ import {
     signInWithEmailAndPassword,
     signInWithPopup,
     GoogleAuthProvider,
-    signOut
+    signOut,
+    sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
 // DOM Elements
@@ -154,8 +155,41 @@ const showAuthAlert = (alertEl, errorCode, context = 'login') => {
 const hideAuthAlert = (alertEl) => {
     if (alertEl) {
         alertEl.style.display = 'none';
-        alertEl.classList.remove('auth-alert-show');
+        alertEl.classList.remove('auth-alert-show', 'auth-alert-success');
     }
+};
+
+// --- Show Inline Success ---
+const showAuthSuccess = (alertEl, title, message) => {
+    if (!alertEl) return;
+
+    alertEl.innerHTML = `
+        <div class="auth-alert-content">
+            <span class="auth-alert-icon">✅</span>
+            <div class="auth-alert-text">
+                <strong>${title}</strong>
+                <p>${message}</p>
+            </div>
+            <button type="button" class="auth-alert-close" onclick="this.closest('.auth-alert').style.display='none'">✕</button>
+        </div>
+    `;
+
+    alertEl.classList.add('auth-alert-success');
+    alertEl.style.display = 'block';
+
+    alertEl.classList.remove('auth-alert-show');
+    requestAnimationFrame(() => alertEl.classList.add('auth-alert-show'));
+
+    // Auto-hide after 8 seconds
+    setTimeout(() => {
+        if (alertEl.style.display !== 'none') {
+            alertEl.classList.remove('auth-alert-show');
+            setTimeout(() => {
+                alertEl.style.display = 'none';
+                alertEl.classList.remove('auth-alert-success');
+            }, 300);
+        }
+    }, 8000);
 };
 
 // Global Toggle Function (exposed to window for onclick in HTML)
@@ -243,6 +277,46 @@ export const setupAuthListeners = () => {
             } catch (error) {
                 console.error('Google login error:', error.code, error.message);
                 showAuthAlert(loginAlert, error.code, 'login');
+            }
+        });
+    }
+
+    // Forgot Password
+    const btnForgot = document.getElementById('btn-forgot-password');
+    if (btnForgot) {
+        btnForgot.addEventListener('click', async () => {
+            const emailInput = document.getElementById('login-email');
+            const email = emailInput ? emailInput.value.trim() : '';
+
+            // Email boşsa input'u vurgula ve hata göster
+            if (!email) {
+                showAuthAlert(loginAlert, 'auth/invalid-email', 'login');
+                if (emailInput) {
+                    emailInput.focus();
+                    emailInput.style.borderColor = 'var(--danger)';
+                    setTimeout(() => { emailInput.style.borderColor = ''; }, 2000);
+                }
+                return;
+            }
+
+            // Buton loading state
+            const originalText = btnForgot.textContent;
+            btnForgot.textContent = 'Gönderiliyor...';
+            btnForgot.disabled = true;
+
+            try {
+                await sendPasswordResetEmail(auth, email);
+                showAuthSuccess(
+                    loginAlert,
+                    'E-posta Gönderildi',
+                    `${email} adresine şifre sıfırlama bağlantısı gönderildi. Spam klasörünü de kontrol etmeyi unutma.`
+                );
+            } catch (error) {
+                console.error('Password reset error:', error.code, error.message);
+                showAuthAlert(loginAlert, error.code, 'login');
+            } finally {
+                btnForgot.textContent = originalText;
+                btnForgot.disabled = false;
             }
         });
     }
