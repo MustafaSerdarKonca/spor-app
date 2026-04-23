@@ -1312,3 +1312,188 @@ main {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-secondary);
 }
+
+/* ============================================
+   HISTORY TOGGLE BUTTON
+   ============================================ */
+.history-toggle-btn {
+  font-size: 12px !important;
+  font-weight: 700;
+  color: var(--primary) !important;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(6, 182, 212, 0.08)) !important;
+  border: 1px solid rgba(59, 130, 246, 0.2) !important;
+  border-radius: 100px !important;
+  padding: 5px 10px !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s var(--ease-out-expo);
+  letter-spacing: 0.2px;
+  line-height: 1.4;
+}
+
+.history-toggle-btn:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(6, 182, 212, 0.15)) !important;
+  border-color: rgba(59, 130, 246, 0.35) !important;
+  transform: translateY(-1px);
+}
+
+.history-toggle-btn.active {
+  background: var(--gradient-primary) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+  box-shadow: var(--shadow-glow);
+}
+
+.history-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 100px;
+  padding: 0 5px;
+  line-height: 1;
+}
+
+.history-toggle-btn.active .history-count-badge {
+  background: rgba(255,255,255,0.3);
+}
+
+/* ============================================
+   FULL HISTORY PANEL
+   ============================================ */
+.full-history-panel {
+  margin-top: 16px;
+  border-top: 1px solid var(--separator);
+  padding-top: 14px;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.3s var(--ease-out-expo), transform 0.3s var(--ease-out-expo);
+}
+
+.full-history-panel.fh-panel-open {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.full-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.full-history-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.full-history-subtitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--background);
+  padding: 3px 10px;
+  border-radius: 100px;
+  border: 1px solid var(--separator);
+}
+
+.full-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.full-history-empty {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: 16px 0;
+  margin: 0;
+}
+
+/* --- Date Group --- */
+.fh-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fh-group-date {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--primary);
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.15);
+  margin-bottom: 2px;
+}
+
+.fh-group-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* --- Single Entry Row --- */
+.fh-entry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--background);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--separator);
+  transition: background 0.15s ease;
+}
+
+.fh-entry:hover {
+  background: rgba(59, 130, 246, 0.04);
+  border-color: rgba(59, 130, 246, 0.12);
+}
+
+.fh-weight {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.2px;
+}
+
+.fh-weight small {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-left: 2px;
+}
+
+.fh-time {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: var(--card-bg);
+  padding: 2px 8px;
+  border-radius: 100px;
+  border: 1px solid var(--separator);
+}
+
+@media (prefers-color-scheme: dark) {
+  .fh-entry {
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .fh-entry:hover {
+    background: rgba(59, 130, 246, 0.07);
+  }
+}

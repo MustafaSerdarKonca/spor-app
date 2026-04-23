@@ -184,6 +184,11 @@ const renderExercises = () => {
         }).join('');
         const imageHtml = ex.image ? `<img src="${ex.image}" class="exercise-thumb" alt="${ex.name}" onclick="viewImage('${ex.image}')">` : '';
 
+        const fullHistoryCount = Array.isArray(ex.fullHistory) ? ex.fullHistory.length : 0;
+        const historyBtnLabel = fullHistoryCount > 0
+            ? `📊 Geçmiş <span class="history-count-badge">${fullHistoryCount}</span>`
+            : '📊 Geçmiş';
+
         card.innerHTML = `
             <div class="card-content-wrapper">
                 <button class="drag-handle" aria-label="Sırayı değiştir" title="Basılı tutup sürükle">⠿</button>
@@ -192,6 +197,7 @@ const renderExercises = () => {
                     <div class="card-header">
                         <h4 class="exercise-name">${ex.name}</h4>
                         <div>
+                            <button class="btn-icon history-toggle-btn" onclick="toggleHistory('${ex.id}')" title="Tüm geçmişi gör">${historyBtnLabel}</button>
                             <button class="btn-icon" onclick="openEditModal('${ex.id}')">✎</button>
                             <button class="btn-icon delete" onclick="deleteExercise('${ex.id}')">🗑</button>
                         </div>
@@ -211,6 +217,19 @@ const renderExercises = () => {
             <div class="actions">
                 <input type="text" inputmode="decimal" class="input-weight" placeholder="Ağırlık (kg)" id="input-${ex.id}">
                 <button class="btn-add-weight" onclick="addWeight('${ex.id}')">Ekle</button>
+            </div>
+            <!-- Full History Panel (hidden by default) -->
+            <div class="full-history-panel" id="full-history-${ex.id}" style="display:none;">
+                <div class="full-history-header">
+                    <span class="full-history-title">📋 Tüm Ağırlık Geçmişi</span>
+                    <span class="full-history-subtitle">${fullHistoryCount} kayıt</span>
+                </div>
+                <div class="full-history-list" id="full-history-list-${ex.id}">
+                    ${fullHistoryCount === 0
+                        ? '<p class="full-history-empty">Henüz kayıt yok. İlk ağırlığını ekle!</p>'
+                        : renderFullHistoryHTML(ex.fullHistory)
+                    }
+                </div>
             </div>
         `;
         exerciseList.appendChild(card);
@@ -237,11 +256,17 @@ window.addWeight = async (exerciseId) => {
             date: new Date().toISOString()
         };
 
+        // --- Quick view: son 3 kayıt (mevcut davranış korunuyor) ---
         currentDayData.exercises[exIndex].history.unshift(newEntry);
-        // Prompt says "4. olursa en eski düşsün"
         if (currentDayData.exercises[exIndex].history.length > 3) {
             currentDayData.exercises[exIndex].history.pop();
         }
+
+        // --- Full history: sınırsız, tüm kayıtlar ---
+        if (!Array.isArray(currentDayData.exercises[exIndex].fullHistory)) {
+            currentDayData.exercises[exIndex].fullHistory = [];
+        }
+        currentDayData.exercises[exIndex].fullHistory.unshift(newEntry);
 
         if (currentUser) {
             await saveDay(currentUser.uid, currentDayData);
@@ -389,8 +414,71 @@ if (exerciseForm) {
 
 // Optional: View Full Image
 window.viewImage = (src) => {
-    // Simple alert or modal for now.
     window.open(src, '_blank');
+};
+
+// --- Full History Renderer ---
+const renderFullHistoryHTML = (fullHistory) => {
+    if (!fullHistory || fullHistory.length === 0) {
+        return '<p class="full-history-empty">Henüz kayıt yok.</p>';
+    }
+
+    // Tarihe göre grupla (YYYY-MM-DD)
+    const groups = {};
+    fullHistory.forEach(entry => {
+        let weight, dateObj;
+        if (typeof entry === 'object' && entry !== null && entry.date) {
+            weight = entry.weight;
+            dateObj = new Date(entry.date);
+        } else {
+            weight = entry;
+            dateObj = null;
+        }
+
+        const groupKey = dateObj
+            ? dateObj.toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' })
+            : 'Tarih bilinmiyor';
+        const timeStr = dateObj
+            ? dateObj.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+            : '';
+
+        if (!groups[groupKey]) groups[groupKey] = [];
+        groups[groupKey].push({ weight, timeStr });
+    });
+
+    // HTML oluştur
+    return Object.entries(groups).map(([dateLabel, entries]) => `
+        <div class="fh-group">
+            <div class="fh-group-date">${dateLabel}</div>
+            <div class="fh-group-entries">
+                ${entries.map(e => `
+                    <div class="fh-entry">
+                        <span class="fh-weight">${e.weight} <small>kg</small></span>
+                        ${e.timeStr ? `<span class="fh-time">${e.timeStr}</span>` : ''}
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `).join('');
+};
+
+// Toggle full history panel
+window.toggleHistory = (exerciseId) => {
+    const panel = document.getElementById(`full-history-${exerciseId}`);
+    const btn = document.querySelector(`[onclick="toggleHistory('${exerciseId}')"]`);
+    if (!panel) return;
+
+    const isOpen = panel.style.display !== 'none';
+    if (isOpen) {
+        panel.style.display = 'none';
+        panel.classList.remove('fh-panel-open');
+        if (btn) btn.classList.remove('active');
+    } else {
+        panel.style.display = 'block';
+        // Kısa gecikme ile animasyon
+        requestAnimationFrame(() => panel.classList.add('fh-panel-open'));
+        if (btn) btn.classList.add('active');
+    }
 };
 
 // --- Boot ---
