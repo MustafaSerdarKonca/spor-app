@@ -1,53 +1,591 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resetting App...</title>
-    <style>
-        body {
-            font-family: system-ui;
-            padding: 40px;
-            text-align: center;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Spor App — Şifre Sıfırla</title>
+  <meta name="description" content="Spor App hesabın için yeni şifreni oluştur.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    :root {
+      --primary: #3B82F6;
+      --primary-light: #60A5FA;
+      --gradient-primary: linear-gradient(135deg, #3B82F6, #06B6D4);
+      --gradient-accent: linear-gradient(135deg, #6366F1, #3B82F6 50%, #06B6D4);
+      --success: #10B981;
+      --danger: #EF4444;
+      --warning: #F59E0B;
+      --radius-xl: 20px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    body {
+      margin: 0; padding: 0;
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #0B0F1A;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      -webkit-font-smoothing: antialiased;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Background */
+    body::after {
+      content: "";
+      position: fixed; inset: -5%;
+      width: 110%; height: 110%;
+      background-image: url('assets/gym_bg.png');
+      background-size: cover;
+      background-position: center;
+      z-index: 0;
+      filter: blur(3px);
+      animation: kenBurns 30s ease-in-out infinite alternate;
+    }
+    body::before {
+      content: "";
+      position: fixed; inset: 0;
+      background: linear-gradient(180deg, rgba(11,15,26,0.82) 0%, rgba(11,15,26,0.68) 50%, rgba(11,15,26,0.88) 100%);
+      z-index: 1;
+    }
+
+    @keyframes kenBurns {
+      0% { transform: scale(1) translate(0,0); }
+      100% { transform: scale(1.15) translate(-2%,-2%); }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes successPop {
+      0%   { transform: scale(0); opacity: 0; }
+      60%  { transform: scale(1.15); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+    @keyframes shimmer {
+      0%   { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+
+    /* Card */
+    .card {
+      position: relative; z-index: 2;
+      width: 100%; max-width: 420px;
+      background: rgba(21, 27, 46, 0.88);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+      overflow: hidden;
+      animation: fadeInUp 0.6s var(--ease-out-expo);
+    }
+
+    /* Gradient accent bar */
+    .card::before {
+      content: "";
+      display: block;
+      height: 3px;
+      background: var(--gradient-accent);
+    }
+
+    .card-body { padding: 36px 32px 40px; }
+
+    /* Brand */
+    .brand {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .brand-icon {
+      width: 56px; height: 56px;
+      border-radius: 16px;
+      background: var(--gradient-primary);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 26px;
+      box-shadow: 0 8px 24px rgba(59,130,246,0.35);
+    }
+    .brand-title {
+      font-size: 28px; font-weight: 900;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+      margin: 0 0 6px;
+    }
+    .brand-sub {
+      font-size: 14px; font-weight: 500;
+      color: rgba(255,255,255,0.45);
+      margin: 0;
+    }
+
+    /* ---- STATES ---- */
+    .state { display: none; }
+    .state.active { display: block; animation: fadeInUp 0.4s var(--ease-out-expo); }
+
+    /* Loading */
+    .loader-wrap { text-align: center; padding: 16px 0 8px; }
+    .spinner {
+      width: 44px; height: 44px;
+      border: 3px solid rgba(59,130,246,0.15);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 20px;
+    }
+    .loader-text { color: rgba(255,255,255,0.5); font-size: 14px; font-weight: 500; }
+
+    /* Email info badge */
+    .email-badge {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(59,130,246,0.08);
+      border: 1px solid rgba(59,130,246,0.18);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      margin-bottom: 24px;
+    }
+    .email-badge-icon { font-size: 18px; }
+    .email-badge-text { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.4; }
+    .email-badge-text strong { display: block; color: var(--primary-light); font-size: 14px; font-weight: 700; }
+
+    /* Form group */
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+      display: block;
+      font-size: 11px; font-weight: 800;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase; letter-spacing: 0.8px;
+      margin-bottom: 8px;
+    }
+    .input-wrap { position: relative; }
+    .form-control {
+      width: 100%; padding: 14px 48px 14px 16px;
+      font-size: 16px; font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      background: rgba(255,255,255,0.06);
+      border: 1.5px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius-md);
+      color: #F1F5F9;
+      outline: none;
+      -webkit-appearance: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    .form-control::placeholder { color: rgba(255,255,255,0.25); }
+    .form-control:focus {
+      border-color: var(--primary);
+      background: rgba(255,255,255,0.08);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
+    }
+    .form-control.error-field { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(239,68,68,0.15); }
+    .form-control.success-field { border-color: var(--success); box-shadow: 0 0 0 3px rgba(16,185,129,0.15); }
+
+    /* Eye toggle */
+    .btn-eye {
+      position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: rgba(255,255,255,0.3); font-size: 18px; line-height: 1;
+      padding: 4px; transition: color 0.15s ease;
+    }
+    .btn-eye:hover { color: rgba(255,255,255,0.6); }
+
+    /* Password strength */
+    .strength-wrap { margin-top: 10px; }
+    .strength-bars {
+      display: flex; gap: 4px; margin-bottom: 6px;
+    }
+    .strength-bar {
+      flex: 1; height: 3px; border-radius: 100px;
+      background: rgba(255,255,255,0.08);
+      transition: background 0.3s ease;
+    }
+    .strength-label {
+      font-size: 11px; font-weight: 700;
+      color: rgba(255,255,255,0.35);
+      transition: color 0.3s ease;
+    }
+
+    /* Match indicator */
+    .match-hint {
+      font-size: 12px; font-weight: 600;
+      margin-top: 8px; height: 16px;
+      transition: all 0.2s ease;
+    }
+    .match-hint.ok  { color: var(--success); }
+    .match-hint.err { color: var(--danger); }
+
+    /* Inline error */
+    .inline-error {
+      font-size: 12px; font-weight: 600;
+      color: var(--danger); margin-top: 6px;
+      display: none;
+    }
+
+    /* Submit btn */
+    .btn-submit {
+      width: 100%; padding: 15px;
+      background: var(--gradient-primary);
+      color: #fff; border: none;
+      font-size: 16px; font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      border-radius: var(--radius-md);
+      cursor: pointer; margin-top: 8px;
+      letter-spacing: 0.3px;
+      box-shadow: 0 4px 20px rgba(59,130,246,0.35);
+      transition: all 0.2s var(--ease-out-expo);
+      position: relative; overflow: hidden;
+    }
+    .btn-submit:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(59,130,246,0.45);
+    }
+    .btn-submit:active:not(:disabled) { transform: translateY(0) scale(0.98); }
+    .btn-submit:disabled {
+      opacity: 0.5; cursor: not-allowed;
+      transform: none; box-shadow: none;
+    }
+    .btn-submit.loading {
+      background-size: 200% auto;
+      background-image: linear-gradient(90deg, #3B82F6 0%, #06B6D4 50%, #3B82F6 100%);
+      animation: shimmer 1.2s linear infinite;
+    }
+
+    /* Success state */
+    .success-icon {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(16,185,129,0.08));
+      border: 2px solid rgba(16,185,129,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px;
+      margin: 8px auto 24px;
+      animation: successPop 0.5s var(--ease-spring);
+    }
+    .success-title {
+      font-size: 22px; font-weight: 800; letter-spacing: -0.3px;
+      color: #F1F5F9; margin: 0 0 10px; text-align: center;
+    }
+    .success-sub {
+      font-size: 14px; color: rgba(255,255,255,0.45); font-weight: 500;
+      margin: 0 0 28px; text-align: center; line-height: 1.6;
+    }
+    .btn-login {
+      width: 100%; padding: 15px;
+      background: rgba(255,255,255,0.06);
+      color: var(--primary-light); border: 1.5px solid rgba(59,130,246,0.25);
+      font-size: 15px; font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      border-radius: var(--radius-md);
+      cursor: pointer; letter-spacing: 0.2px;
+      transition: all 0.2s ease;
+    }
+    .btn-login:hover {
+      background: rgba(59,130,246,0.1);
+      border-color: rgba(59,130,246,0.45);
+    }
+
+    /* Error state */
+    .error-icon {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: rgba(239,68,68,0.1);
+      border: 2px solid rgba(239,68,68,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px; margin: 8px auto 24px;
+      animation: successPop 0.5s var(--ease-spring);
+    }
+    .error-state-title {
+      font-size: 20px; font-weight: 800; color: #FCA5A5;
+      margin: 0 0 10px; text-align: center;
+    }
+    .error-state-sub {
+      font-size: 14px; color: rgba(255,255,255,0.45);
+      margin: 0 0 28px; text-align: center; line-height: 1.6;
+    }
+
+    /* Footer */
+    .card-footer {
+      text-align: center;
+      padding: 0 32px 28px;
+      color: rgba(255,255,255,0.2);
+      font-size: 12px;
+    }
+  </style>
 </head>
-
 <body>
-    <h1>Uygulama Sıfırlanıyor...</h1>
-    <p>Lütfen bekleyin, temizlik yapılıyor.</p>
-    <div id="log">Starting...</div>
 
-    <script>
-        async function reset() {
-            const log = document.getElementById('log');
+<div class="card">
+  <div class="card::before"></div>
+  <div class="card-body">
 
-            // 1. Unregister SW
-            if ('serviceWorker' in navigator) {
-                const registrations = await navigator.serviceWorker.getRegistrations();
-                for (let registration of registrations) {
-                    await registration.unregister();
-                    log.innerHTML += '<br>Service Worker silindi.';
-                }
-            }
+    <!-- Brand -->
+    <div class="brand">
+      <div class="brand-icon">🏋️</div>
+      <h1 class="brand-title">Spor App</h1>
+      <p class="brand-sub">Şifre Sıfırlama</p>
+    </div>
 
-            // 2. Clear Caches
-            const keys = await caches.keys();
-            for (const key of keys) {
-                await caches.delete(key);
-                log.innerHTML += `<br>Önbellek temizlendi: ${key}`;
-            }
+    <!-- STATE: Loading -->
+    <div class="state active" id="state-loading">
+      <div class="loader-wrap">
+        <div class="spinner"></div>
+        <p class="loader-text">Bağlantı doğrulanıyor…</p>
+      </div>
+    </div>
 
-            // 3. Redirect
-            log.innerHTML += '<br><b>TAMAMLANDI! Yönlendiriliyor...</b>';
-            setTimeout(() => {
-                window.location.href = 'index.html?v=' + Date.now();
-            }, 1500);
-        }
+    <!-- STATE: Form -->
+    <div class="state" id="state-form">
+      <div class="email-badge">
+        <span class="email-badge-icon">📧</span>
+        <div class="email-badge-text">
+          <strong id="display-email">—</strong>
+          hesabı için yeni şifre oluşturuluyor
+        </div>
+      </div>
 
-        reset();
-    </script>
+      <div class="form-group">
+        <label>Yeni Şifre</label>
+        <div class="input-wrap">
+          <input type="password" id="inp-password" class="form-control" placeholder="En az 6 karakter" autocomplete="new-password">
+          <button type="button" class="btn-eye" id="toggle-pw" aria-label="Şifreyi göster/gizle">👁</button>
+        </div>
+        <div class="strength-wrap" id="strength-wrap" style="display:none;">
+          <div class="strength-bars">
+            <div class="strength-bar" id="sb1"></div>
+            <div class="strength-bar" id="sb2"></div>
+            <div class="strength-bar" id="sb3"></div>
+            <div class="strength-bar" id="sb4"></div>
+          </div>
+          <span class="strength-label" id="strength-label"></span>
+        </div>
+        <div class="inline-error" id="err-password"></div>
+      </div>
+
+      <div class="form-group">
+        <label>Şifreyi Onayla</label>
+        <div class="input-wrap">
+          <input type="password" id="inp-confirm" class="form-control" placeholder="Şifreni tekrar gir" autocomplete="new-password">
+          <button type="button" class="btn-eye" id="toggle-cf" aria-label="Şifreyi göster/gizle">👁</button>
+        </div>
+        <div class="match-hint" id="match-hint"></div>
+        <div class="inline-error" id="err-confirm"></div>
+      </div>
+
+      <button class="btn-submit" id="btn-submit">Şifremi Güncelle</button>
+    </div>
+
+    <!-- STATE: Success -->
+    <div class="state" id="state-success">
+      <div class="success-icon">✅</div>
+      <h2 class="success-title">Şifren Güncellendi!</h2>
+      <p class="success-sub">Yeni şifrenle artık giriş yapabilirsin.<br>Seni bekliyoruz 💪</p>
+      <button class="btn-submit" onclick="window.location.href='index.html'">Giriş Sayfasına Dön</button>
+    </div>
+
+    <!-- STATE: Error -->
+    <div class="state" id="state-error">
+      <div class="error-icon">⛔</div>
+      <h2 class="error-state-title">Bağlantı Geçersiz</h2>
+      <p class="error-state-sub" id="error-message">Bu bağlantının süresi dolmuş veya daha önce kullanılmış.<br>Lütfen yeni bir şifre sıfırlama isteği gönder.</p>
+      <button class="btn-submit" onclick="window.location.href='index.html'">Giriş Sayfasına Dön</button>
+    </div>
+
+  </div><!-- card-body -->
+  <div class="card-footer">Spor App &copy; 2025 — Tüm hakları saklıdır</div>
+</div>
+
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js';
+  import { getAuth, verifyPasswordResetCode, confirmPasswordReset }
+    from 'https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js';
+
+  // Firebase config
+  const app = initializeApp({
+    apiKey: "AIzaSyA18EFuGFq9TuAC7S-fw6nq8VY_X9H6Omw",
+    authDomain: "spor-app-98027.firebaseapp.com",
+    projectId: "spor-app-98027",
+    storageBucket: "spor-app-98027.firebasestorage.app",
+    messagingSenderId: "38427901547",
+    appId: "1:38427901547:web:b78bd902af1b9e2ccebb2e"
+  });
+  const auth = getAuth(app);
+
+  // --- URL params ---
+  const params  = new URLSearchParams(window.location.search);
+  const mode    = params.get('mode');
+  const oobCode = params.get('oobCode');
+
+  // --- State helper ---
+  const states = ['loading','form','success','error'];
+  function showState(id) {
+    states.forEach(s => {
+      const el = document.getElementById('state-' + s);
+      el.classList.toggle('active', s === id);
+    });
+  }
+
+  // --- Strength checker ---
+  const STRENGTHS = [
+    { label: '',          color: 'transparent' },
+    { label: 'Zayıf',    color: '#EF4444' },
+    { label: 'Orta',     color: '#F59E0B' },
+    { label: 'Güçlü',   color: '#10B981' },
+    { label: 'Çok Güçlü', color: '#3B82F6' },
+  ];
+
+  function calcStrength(pw) {
+    if (!pw) return 0;
+    let s = 0;
+    if (pw.length >= 6)  s++;
+    if (pw.length >= 10) s++;
+    if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) s++;
+    if (/[0-9]/.test(pw)) s++;
+    if (/[^A-Za-z0-9]/.test(pw)) s++;
+    return Math.min(4, Math.max(1, s > 4 ? 4 : s));
+  }
+
+  function updateStrengthUI(pw) {
+    const wrap = document.getElementById('strength-wrap');
+    if (!pw) { wrap.style.display = 'none'; return; }
+    wrap.style.display = 'block';
+    const score = calcStrength(pw);
+    const info  = STRENGTHS[score];
+    [1,2,3,4].forEach(i => {
+      const bar = document.getElementById('sb' + i);
+      bar.style.background = i <= score ? info.color : 'rgba(255,255,255,0.08)';
+    });
+    const lbl = document.getElementById('strength-label');
+    lbl.textContent = info.label;
+    lbl.style.color = info.color;
+  }
+
+  // --- DOM refs ---
+  const inpPw  = document.getElementById('inp-password');
+  const inpCf  = document.getElementById('inp-confirm');
+  const errPw  = document.getElementById('err-password');
+  const errCf  = document.getElementById('err-confirm');
+  const matchH = document.getElementById('match-hint');
+  const btnSub = document.getElementById('btn-submit');
+
+  // Show/hide toggles
+  function makeToggle(btnId, inputEl) {
+    document.getElementById(btnId).addEventListener('click', () => {
+      const show = inputEl.type === 'password';
+      inputEl.type = show ? 'text' : 'password';
+      document.getElementById(btnId).textContent = show ? '🙈' : '👁';
+    });
+  }
+  makeToggle('toggle-pw', inpPw);
+  makeToggle('toggle-cf', inpCf);
+
+  // Password input listeners
+  inpPw.addEventListener('input', () => {
+    updateStrengthUI(inpPw.value);
+    errPw.style.display = 'none';
+    inpPw.classList.remove('error-field');
+    updateMatchUI();
+  });
+
+  inpCf.addEventListener('input', () => {
+    errCf.style.display = 'none';
+    inpCf.classList.remove('error-field');
+    updateMatchUI();
+  });
+
+  function updateMatchUI() {
+    const pw = inpPw.value;
+    const cf = inpCf.value;
+    if (!cf) { matchH.textContent = ''; matchH.className = 'match-hint'; return; }
+    if (pw === cf) {
+      matchH.textContent = '✓ Şifreler eşleşiyor';
+      matchH.className   = 'match-hint ok';
+      inpCf.classList.add('success-field');
+      inpCf.classList.remove('error-field');
+    } else {
+      matchH.textContent = '✗ Şifreler eşleşmiyor';
+      matchH.className   = 'match-hint err';
+      inpCf.classList.add('error-field');
+      inpCf.classList.remove('success-field');
+    }
+  }
+
+  // Submit
+  btnSub.addEventListener('click', async () => {
+    const pw = inpPw.value.trim();
+    const cf = inpCf.value.trim();
+    let valid = true;
+
+    if (pw.length < 6) {
+      errPw.textContent = 'Şifre en az 6 karakter olmalıdır.';
+      errPw.style.display = 'block';
+      inpPw.classList.add('error-field');
+      valid = false;
+    }
+    if (pw !== cf) {
+      errCf.textContent = 'Şifreler eşleşmiyor.';
+      errCf.style.display = 'block';
+      inpCf.classList.add('error-field');
+      valid = false;
+    }
+    if (!valid) return;
+
+    // Loading
+    btnSub.disabled = true;
+    btnSub.textContent = 'Kaydediliyor…';
+    btnSub.classList.add('loading');
+
+    try {
+      await confirmPasswordReset(auth, oobCode, pw);
+      showState('success');
+    } catch (err) {
+      console.error(err);
+      let msg = 'Bir hata oluştu. Lütfen tekrar dene.';
+      if (err.code === 'auth/expired-action-code') msg = 'Bu bağlantının süresi dolmuş. Lütfen yeni bir sıfırlama isteği gönder.';
+      if (err.code === 'auth/invalid-action-code')  msg = 'Geçersiz bağlantı. Bağlantı daha önce kullanılmış olabilir.';
+      if (err.code === 'auth/weak-password')         msg = 'Şifre çok zayıf. Lütfen daha güçlü bir şifre seç.';
+      document.getElementById('error-message').textContent = msg;
+      showState('error');
+    }
+  });
+
+  // --- Init: verify OOB code ---
+  async function init() {
+    if (mode !== 'resetPassword' || !oobCode) {
+      document.getElementById('error-message').textContent =
+        'Geçersiz bağlantı. Lütfen e-postanızdaki bağlantıyı kullanın.';
+      showState('error');
+      return;
+    }
+
+    try {
+      const email = await verifyPasswordResetCode(auth, oobCode);
+      document.getElementById('display-email').textContent = email;
+      showState('form');
+    } catch (err) {
+      console.error(err);
+      if (err.code === 'auth/expired-action-code') {
+        document.getElementById('error-message').textContent =
+          'Bu bağlantının süresi dolmuş. Lütfen yeni bir şifre sıfırlama isteği gönder.';
+      }
+      showState('error');
+    }
+  }
+
+  init();
+</script>
+
 </body>
-
 </html>
