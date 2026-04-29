@@ -95,6 +95,12 @@
             <div class="header-top">
                 <span class="header-brand">SporApp</span>
                 <div class="header-actions">
+                    <!-- Timer chip (görünür sadece sayaç çalışıyorken ve panel kapalıyken) -->
+                    <div class="timer-chip" id="timer-chip">
+                        <span class="timer-chip-icon">⏱</span>
+                        <span id="timer-chip-time">3:00</span>
+                    </div>
+                    <button id="btn-timer-open" class="btn-icon" title="Dinlenme Sayacı">⏱</button>
                     <button id="btn-enable-notify" class="btn-icon" title="Bildirimleri Aç">🔔</button>
                     <button id="btn-logout" class="btn-text" style="width:auto; padding:8px 12px; margin:0;">Çıkış</button>
                 </div>
@@ -103,6 +109,34 @@
                 <!-- Populated by JS -->
             </div>
         </header>
+
+        <!-- ⏱ Dinlenme Sayacı Paneli -->
+        <div class="timer-panel" id="timer-panel">
+            <div class="timer-panel-handle"></div>
+            <div class="timer-panel-header">
+                <div class="timer-panel-title">⏱ Dinlenme Sayacı</div>
+                <button class="btn-icon" id="btn-timer-close" title="Küçült">⌄</button>
+            </div>
+
+            <div class="timer-circle-wrap">
+                <svg class="timer-svg" viewBox="0 0 120 120" aria-hidden="true">
+                    <circle class="timer-track"    cx="60" cy="60" r="54"/>
+                    <circle class="timer-progress" id="timer-progress-circle" cx="60" cy="60" r="54"/>
+                </svg>
+                <div class="timer-center">
+                    <div class="timer-display" id="timer-display">3:00</div>
+                    <div class="timer-sub">kalan süre</div>
+                </div>
+            </div>
+
+            <div class="timer-adj-row">
+                <button class="btn-timer-adj" id="btn-timer-minus">−30s</button>
+                <span class="timer-duration-label" id="timer-duration-label">3 dakika</span>
+                <button class="btn-timer-adj" id="btn-timer-plus">+30s</button>
+            </div>
+
+            <button class="btn-timer-toggle" id="btn-timer-toggle">Başlat</button>
+        </div>
 
         <main id="exercise-list">
             <!-- populated by JS -->

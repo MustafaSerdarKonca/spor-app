@@ -9,6 +9,7 @@ import { subscribeUserToPush, listenForMessages } from './notifications.js';
 // Future step: Switch 'db.js' to use Firestore 'db' instance.
 import { getDay, saveDay } from './db.js';
 import { processImage } from './image_utils.js';
+import { initTimer, autoStartTimer } from './timer.js';
 
 // --- Toast Notification Utility ---
 const showToast = (message, type = 'success', duration = 2000) => {
@@ -68,6 +69,7 @@ const init = async () => {
             console.log("Logged in:", user.email);
             // Initialize App
             setupTabs();
+            initTimer();
             // Determine current day
             const todayIndex = new Date().getDay();
             const mappedIndex = todayIndex === 0 ? 6 : todayIndex - 1;
@@ -281,6 +283,8 @@ window.addWeight = async (exerciseId) => {
         }
 
         showToast(`✅ ${val} kg eklendi!`);
+        // Dinlenme sayacını otomatik başlat
+        autoStartTimer();
     }
 };
 

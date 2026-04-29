@@ -1,8 +1,8 @@
 importScripts('https://www.gstatic.com/firebasejs/11.0.2/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/11.0.2/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'spor-app-v17'; // Password reset feature
-const LAST_UPDATED = '2026-04-23T21:05:00';
+const CACHE_NAME = 'spor-app-v18'; // Rest timer feature
+const LAST_UPDATED = '2026-04-29T22:55:00';
 
 const ASSETS = [
     './',
@@ -13,6 +13,7 @@ const ASSETS = [
     './js/auth.js',
     './js/firebase-config.js',
     './js/notifications.js',
+    './js/timer.js',
     './manifest.json'
 ];
 
@@ -123,4 +124,35 @@ self.addEventListener('notificationclick', (event) => {
             }
         })
     );
+});
+
+// ─── Rest Timer: background notification ─────────────────────────────────────
+let timerTimeout = null;
+
+self.addEventListener('message', event => {
+    const data = event.data || {};
+
+    if (data.type === 'TIMER_START') {
+        if (timerTimeout) { clearTimeout(timerTimeout); timerTimeout = null; }
+        const remaining = data.endTime - Date.now();
+        if (remaining > 0) {
+            timerTimeout = setTimeout(() => {
+                self.registration.showNotification(data.title || '💪 Dinlenme Bitti!', {
+                    body:               data.body || 'Set arası dinlenme süren doldu. Devam et!',
+                    icon:               '/assets/icons/icon-192.png',
+                    badge:              '/assets/icons/icon-192.png',
+                    vibrate:            [300, 100, 300, 100, 600],
+                    tag:                'rest-timer',
+                    renotify:           true,
+                    requireInteraction: true,
+                    data:               { url: '/' }
+                });
+                timerTimeout = null;
+            }, remaining);
+        }
+    }
+
+    if (data.type === 'TIMER_CANCEL') {
+        if (timerTimeout) { clearTimeout(timerTimeout); timerTimeout = null; }
+    }
 });
