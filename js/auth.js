@@ -334,19 +334,25 @@ export const setupAuthListeners = () => {
 };
 
 export const updateUIForUser = (user) => {
+    // Her durumda splash'i kaldır (Firebase auth state belirlendi)
+    const splash = document.getElementById('auth-splash');
+    if (splash) {
+        splash.style.transition = 'opacity 0.3s ease';
+        splash.style.opacity = '0';
+        setTimeout(() => splash.remove(), 300);
+    }
+
     if (user) {
         // Show App
         authContainer.classList.add('hidden');
         appContainer.classList.remove('hidden');
-        appContainer.style.display = 'block'; // Ensure block
-        // Clear any leftover alerts
+        appContainer.style.display = 'block';
         hideAuthAlert(loginAlert);
         hideAuthAlert(registerAlert);
     } else {
         // Show Auth
         authContainer.classList.remove('hidden');
         appContainer.classList.add('hidden');
-        // Reset forms
         loginForm.reset();
         registerForm.reset();
     }

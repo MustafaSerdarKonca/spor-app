@@ -1,11 +1,12 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import {
+    getAuth,
+    setPersistence,
+    browserLocalPersistence
+} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 import { getFirestore, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-messaging.js";
 
-// TODO: KULLANICI BURAYI GUNCELLEYECEK
-// Lutfen firebase_setup_instructions.md dosyasindaki adimlari takip ederek
-// kendi proje bilgilerinizi buraya yapistirin.
 const firebaseConfig = {
     apiKey: "AIzaSyA18EFuGFq9TuAC7S-fw6nq8VY_X9H6Omw",
     authDomain: "spor-app-98027.firebaseapp.com",
@@ -22,15 +23,21 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const messaging = getMessaging(app);
 
-// Enable Offline Persistence
+// ── Kalıcı oturum: tarayıcı / PWA kapatılsa bile giriş korunur ───────────────
+// browserLocalPersistence → IndexedDB/localStorage tabanlı;
+// iOS Safari PWA standalone modu dahil tüm platformlarda çalışır.
+setPersistence(auth, browserLocalPersistence).catch(err => {
+    console.warn('Auth persistence ayarlanamadı:', err.message);
+});
+
+// Firestore offline persistence
 enableIndexedDbPersistence(db)
     .catch((err) => {
-        if (err.code == 'failed-precondition') {
-            console.warn('Persistence failed: Multiple tabs open');
-        } else if (err.code == 'unimplemented') {
-            console.warn('Persistence not supported by browser');
+        if (err.code === 'failed-precondition') {
+            console.warn('Firestore persistence: birden fazla sekme açık');
+        } else if (err.code === 'unimplemented') {
+            console.warn('Firestore persistence bu tarayıcıda desteklenmiyor');
         }
     });
 
-// Export for other files to use
 export { auth, db, messaging, getToken };

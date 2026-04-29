@@ -27,7 +27,33 @@
 
 <body>
 
-    <div id="auth-container">
+    <!-- Auth Loading Splash (Firebase token kontrol edilirken) -->
+    <div id="auth-splash" style="
+        position:fixed; inset:0; z-index:9999;
+        display:flex; flex-direction:column;
+        align-items:center; justify-content:center;
+        background:#0B0F1A;
+    ">
+        <div style="
+            font-size:44px; margin-bottom:20px;
+            animation: splashPulse 1.2s ease-in-out infinite;
+        ">🏋️</div>
+        <div style="
+            font-size:26px; font-weight:900;
+            background: linear-gradient(135deg,#3B82F6,#06B6D4);
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+            background-clip:text; font-family:'Inter',sans-serif;
+            letter-spacing:-0.5px;
+        ">Spor App</div>
+        <style>
+            @keyframes splashPulse {
+                0%,100% { transform: scale(1); }
+                50%      { transform: scale(1.12); }
+            }
+        </style>
+    </div>
+
+    <div id="auth-container" class="hidden">
         <div class="auth-card">
             <div class="auth-header">
                 <h1>Spor App</h1>
@@ -90,7 +116,7 @@
     </div>
 
     <!-- Main App (Initially Hidden) -->
-    <div id="app-container" style="display: none;">
+    <div id="app-container" class="hidden">
         <header>
             <div class="header-top">
                 <span class="header-brand">SporApp</span>

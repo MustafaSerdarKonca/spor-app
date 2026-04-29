@@ -1,7 +1,7 @@
 importScripts('https://www.gstatic.com/firebasejs/11.0.2/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/11.0.2/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'spor-app-v18'; // Rest timer feature
+const CACHE_NAME = 'spor-app-v19'; // Persistent auth + loading splash
 const LAST_UPDATED = '2026-04-29T22:55:00';
 
 const ASSETS = [
